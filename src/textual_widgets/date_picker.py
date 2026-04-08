@@ -57,8 +57,10 @@ class CalendarGrid(Static):
         self,
         year: int | None = None,
         month: int | None = None,
+        selected_day: int = 0,
         weekend_style: str = "#cc8800",
         today_style: str = "bold underline #00cccc",
+        selected_style: str = "bold reverse",
         header_style: str = "bold dim",
         weekend_header_style: str = "bold #cc8800",
         **kwargs: object,
@@ -68,9 +70,13 @@ class CalendarGrid(Static):
         self._year = year or today.year
         self._month = month or today.month
         self._today = today
+        self._selected_day = selected_day
+        self._selected_year = self._year
+        self._selected_month = self._month
         self._weeks: list[list[int]] = []
         self._weekend_style = weekend_style
         self._today_style = today_style
+        self._selected_style = selected_style
         self._header_style = header_style
         self._weekend_header_style = weekend_header_style
         self._rebuild_weeks()
@@ -104,14 +110,19 @@ class CalendarGrid(Static):
             text.append(f" {wd} ", style=style)
         text.append("\n")
 
-        is_current = (self._year == self._today.year
-                      and self._month == self._today.month)
+        is_today_month = (self._year == self._today.year
+                         and self._month == self._today.month)
+        show_selected = (self._selected_day > 0
+                         and self._year == self._selected_year
+                         and self._month == self._selected_month)
         for week in self._weeks:
             for i, day in enumerate(week):
                 if day == 0:
                     text.append("    ")
                 else:
-                    if is_current and day == self._today.day:
+                    if show_selected and day == self._selected_day:
+                        style = self._selected_style
+                    elif is_today_month and day == self._today.day:
                         style = self._today_style
                     elif i >= 5:
                         style = self._weekend_style
@@ -189,6 +200,7 @@ class DatePicker(Vertical):
         self,
         year: int | None = None,
         month: int | None = None,
+        selected_day: int = 0,
         **kwargs: object,
     ) -> None:
         super().__init__(**kwargs)
@@ -196,6 +208,7 @@ class DatePicker(Vertical):
         self._year = year or today.year
         self._month = month or today.month
         self._today = today
+        self._selected_day = selected_day
 
     def compose(self) -> ComposeResult:
         with Horizontal(classes="dp-nav-row"):
@@ -204,7 +217,11 @@ class DatePicker(Vertical):
             yield Static(self._format_month(), id="dp-month-label", classes="dp-month-label")
             yield Button(">", id="dp-next-month", classes="dp-nav-btn")
             yield Button(">>", id="dp-next-year", classes="dp-nav-btn")
-        yield CalendarGrid(self._year, self._month, id="dp-cal-grid")
+        yield CalendarGrid(
+            self._year, self._month,
+            selected_day=self._selected_day,
+            id="dp-cal-grid",
+        )
         yield Static(
             f"Heute: {self._today.strftime('%d.%m.%Y')}",
             classes="dp-today-hint",
@@ -294,11 +311,14 @@ class DatePickerScreen(ModalScreen[str | None]):
         self._today = today
         year = today.year
         month = today.month
+        self._selected_day = 0
         if initial_date:
             try:
                 parts = initial_date.split("-")
                 year = int(parts[0])
                 month = int(parts[1])
+                if len(parts) >= 3 and parts[2]:
+                    self._selected_day = int(parts[2])
             except (ValueError, IndexError):
                 pass
         self._year = year
@@ -307,7 +327,11 @@ class DatePickerScreen(ModalScreen[str | None]):
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Static("Datum auswaehlen", id="dps-title")
-            yield DatePicker(self._year, self._month, id="dps-picker")
+            yield DatePicker(
+                self._year, self._month,
+                selected_day=self._selected_day,
+                id="dps-picker",
+            )
             with Horizontal(classes="dps-button-row"):
                 yield Button("Heute", variant="primary", id="dps-today")
                 yield Button("Abbrechen", id="dps-cancel")

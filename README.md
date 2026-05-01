@@ -67,6 +67,83 @@ class MyWidget(Vertical):
         print(f"Tag {event.day} geklickt")
 ```
 
+### SearchHistoryDropdown
+
+Such-Verlauf-Dropdown mit Substring-Filter und Treffer-Hervorhebung. Ideal fuer
+Suchfelder, die haeufig genutzte Eingaben wieder anbieten sollen — beim Tippen
+"myl" erscheinen "**myl**ene farmer", "best of **myl**ene", usw. mit
+hervorgehobenem Treffer.
+
+Zwei Abstraktionsstufen:
+
+| Widget | Beschreibung | Verwendung |
+|--------|-------------|------------|
+| `SearchHistoryDropdown` | OptionList mit Filter + Highlighting | Einbetten neben einem eigenen Input |
+| `SearchInputWithHistory` | Input + Dropdown verdrahtet | Drop-in fuer einzelnes `Input` |
+
+**Features:**
+- Substring-Filter (case-insensitive) waehrend des Tippens
+- Treffer im Eintrag hervorgehoben (Accent-Farbe, fett)
+- Pfeil-Tasten / Maus zur Auswahl, `Enter` uebernimmt + submitet automatisch
+- `Delete` loescht Eintrag aus dem Verlauf (Persistenz beim Host)
+- `Escape` schliesst das Dropdown
+- Sendet weiterhin `Input.Submitted` — bestehende Submit-Handler bleiben
+
+**Beispiel — SearchInputWithHistory (Drop-in):**
+
+```python
+from textual.widgets import Input
+from textual_widgets import SearchInputWithHistory
+
+class MyApp(App):
+    def compose(self) -> ComposeResult:
+        yield SearchInputWithHistory(
+            placeholder="Search ...",
+            entries=self._history_repo.list_recent(20),  # initiale Liste
+            id="global-search",
+        )
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        # Wird auch bei Auswahl aus dem Dropdown ausgeloest
+        query = event.value.strip()
+        if not query:
+            return
+        self._history_repo.add(query)
+        # Dropdown-Liste aktualisieren:
+        search = self.query_one("#global-search", SearchInputWithHistory)
+        search.set_entries(self._history_repo.list_recent(20))
+        # ... Suche starten ...
+
+    def on_search_input_with_history_history_entry_delete_requested(
+        self, event: SearchInputWithHistory.HistoryEntryDeleteRequested,
+    ) -> None:
+        self._history_repo.delete(event.entry)
+        search = self.query_one("#global-search", SearchInputWithHistory)
+        search.set_entries(self._history_repo.list_recent(20))
+```
+
+**Beispiel — SearchHistoryDropdown (eigenes Input):**
+
+```python
+from textual.widgets import Input
+from textual_widgets import SearchHistoryDropdown
+
+class MyScreen(Screen):
+    def compose(self) -> ComposeResult:
+        yield Input(id="my-input")
+        yield SearchHistoryDropdown(entries=["foo", "bar"], id="my-dropdown")
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        dd = self.query_one("#my-dropdown", SearchHistoryDropdown)
+        dd.filter(event.value)
+        dd.show()
+
+    def on_search_history_dropdown_entry_selected(
+        self, event: SearchHistoryDropdown.EntrySelected,
+    ) -> None:
+        self.query_one("#my-input", Input).value = event.entry
+```
+
 ## Installation
 
 ```bash

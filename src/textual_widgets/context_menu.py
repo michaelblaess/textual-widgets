@@ -160,24 +160,45 @@ class ContextMenuScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         """Positioniert das Menue am Klick-Punkt (mit Off-Screen-Schutz).
 
-        Wichtig: `outer_size` ist beim ersten Mount noch (0, 0), weil das
-        Widget noch nicht gerendert wurde. Deshalb berechnen wir die
-        erwartete Groesse deterministisch aus den Items selbst — sonst
-        ragt das Menue beim ersten Oeffnen aus dem sichtbaren Bereich.
+        Zwei-Phasen-Positionierung gegen das First-Open-Cut-Off-Problem:
+
+        1. Sofort: deterministische Schaetzung aus den Items
+           (`_estimate_size`). `outer_size` ist beim ersten Mount noch
+           (0, 0), weil das Widget noch nicht gerendert wurde.
+        2. Nach dem ersten Refresh: echte `outer_size` einsetzen und ggf.
+           neu positionieren — bevor der User interagieren kann.
+
+        Ohne Phase 2 sieht man je nach Theme/Border-Default beim ersten
+        Oeffnen einen Teil des Menues abgeschnitten; ab dem zweiten Klick
+        stimmt es dann (weil Textual die Groesse inzwischen berechnet hat).
         """
-        container = self.query_one(Vertical)
         if self._at is not None:
-            x, y = self._at
-            term_w, term_h = self.app.size
-            menu_w, menu_h = self._estimate_size()
-            # An Rand pinnen, damit das Menue nicht aus dem Terminal herausragt
-            x = max(0, min(x, term_w - menu_w))
-            y = max(0, min(y, term_h - menu_h))
-            container.styles.offset = (x, y)
+            self._apply_position()
+            self.call_after_refresh(self._apply_position)
         else:
             # Fallback: zentriert (z.B. bei Tastatur-Trigger ohne Click-Coords)
             self.styles.align = ("center", "middle")
         self.query_one(OptionList).focus()
+
+    def _apply_position(self) -> None:
+        """Positioniert das Menue. Nutzt echte `outer_size` wenn verfuegbar,
+        sonst die Schaetzung aus `_estimate_size()`.
+        """
+        if self._at is None:
+            return
+        container = self.query_one(Vertical)
+        x, y = self._at
+        term_w, term_h = self.app.size
+        # Echte Groesse bevorzugen — beim ersten Mount ist sie 0, dann fallback
+        actual_w = container.outer_size.width
+        actual_h = container.outer_size.height
+        if actual_w > 0 and actual_h > 0:
+            menu_w, menu_h = actual_w, actual_h
+        else:
+            menu_w, menu_h = self._estimate_size()
+        x = max(0, min(x, term_w - menu_w))
+        y = max(0, min(y, term_h - menu_h))
+        container.styles.offset = (x, y)
 
     def _estimate_size(self) -> tuple[int, int]:
         """Berechnet die erwartete Menue-Groesse vor dem Render.

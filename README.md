@@ -144,6 +144,72 @@ class MyScreen(Screen):
         self.query_one("#my-input", Input).value = event.entry
 ```
 
+### ContextMenu
+
+Wiederverwendbares Kontextmenue als ModalScreen. Items werden deklarativ als
+Liste von `ContextMenuItem` uebergeben — der Konsument kuemmert sich um
+Trigger (typisch Right-Click) und Aktion. Das Widget uebernimmt Layout,
+Positionierung am Maus-Cursor, Tastatur-Navigation und Theme-Farben.
+
+| Widget | Beschreibung | Verwendung |
+|--------|-------------|------------|
+| `ContextMenuItem` | Dataclass: `id`, `label`, optional `icon`, `shortcut`, `enabled` | Liste an `ContextMenuScreen` uebergeben |
+| `ContextMenuScreen` | Modaler Dialog mit OptionList | `push_screen()` mit Callback |
+
+**Features:**
+- Positionierung am Maus-Cursor (`at=(event.screen_x, event.screen_y)`),
+  Off-Screen-Schutz pinnt das Menue an den Terminal-Rand wenn noetig
+- Optional zentriert (Fallback bei Tastatur-Trigger ohne Click-Coords)
+- Icons als Praefix vor dem Label (Emoji oder Unicode-Zeichen)
+- Tastatur-Shortcuts rechtsbuendig in `dim` als REINE Anzeige
+  (Trigger bleibt beim Konsumenten)
+- Disabled Items werden ausgegraut und sind nicht waehlbar
+- Separator-Trennlinien via `ContextMenuItem.separator()`
+- ESC oder Klick ausserhalb schliesst mit `None`
+- Theme-Farben via `$accent` / `$surface`
+
+**Beispiel:**
+
+```python
+from textual.events import Click
+from textual_widgets import ContextMenuItem, ContextMenuScreen
+
+class FolderBrowser(Tree):
+    def on_click(self, event: Click) -> None:
+        if event.button != 3:  # nur Rechtsklick
+            return
+        node = self.cursor_node
+        if node is None:
+            return
+        is_dir = bool(node.data and node.data.is_dir())
+        items = [
+            ContextMenuItem("open", "Oeffnen", icon="📂", shortcut="Enter"),
+            ContextMenuItem("rename", "Umbenennen", icon="✎", shortcut="Ctrl+R"),
+            ContextMenuItem.separator(),
+            ContextMenuItem(
+                "delete", "Loeschen", icon="✕", shortcut="Del",
+                enabled=not is_dir,  # Verzeichnisse nicht loeschbar
+            ),
+        ]
+        self.app.push_screen(
+            ContextMenuScreen(items, at=(event.screen_x, event.screen_y)),
+            callback=self._on_menu_action,
+        )
+
+    def _on_menu_action(self, action_id: str | None) -> None:
+        if action_id is None:
+            return  # ESC oder Click-outside
+        if action_id == "open":
+            self.action_select_cursor()
+        elif action_id == "rename":
+            ...
+```
+
+**Hinweis zu Shortcuts:** Das `shortcut`-Feld wird nur **angezeigt** — den
+Tastendruck musst du selbst ueber Bindings am uebergeordneten Widget
+abfangen. So bleibt das Menue mit deinem bestehenden Shortcut-Schema
+konsistent.
+
 ## Installation
 
 ```bash

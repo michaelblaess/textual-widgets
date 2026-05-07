@@ -83,3 +83,59 @@ class TestContextMenuScreen:
         screen = ContextMenuScreen(items)
         assert len(screen._items) == 3
         assert screen._items[1].is_separator is True
+
+
+class TestEstimateSize:
+    """Validiert die Groessen-Schaetzung fuer Off-Screen-Schutz beim ersten Render."""
+
+    def test_minimum_width_for_short_labels(self) -> None:
+        items = [ContextMenuItem(id="a", label="X")]
+        screen = ContextMenuScreen(items)
+        w, _ = screen._estimate_size()
+        assert w == 16  # min-width-Klemme
+
+    def test_maximum_width_caps_long_labels(self) -> None:
+        items = [ContextMenuItem(id="a", label="x" * 100)]
+        screen = ContextMenuScreen(items)
+        w, _ = screen._estimate_size()
+        assert w == 60  # max-width-Klemme
+
+    def test_width_scales_with_label_length(self) -> None:
+        items = [ContextMenuItem(id="a", label="Hallo Welt 12345678")]
+        screen = ContextMenuScreen(items)
+        w, _ = screen._estimate_size()
+        # 19 Zeichen Label + 4 (Padding + Border) = 23
+        assert w == 23
+
+    def test_width_includes_shortcut_column(self) -> None:
+        items = [
+            ContextMenuItem(id="a", label="Open", shortcut="Ctrl+O"),
+            ContextMenuItem(id="b", label="Save"),
+        ]
+        screen = ContextMenuScreen(items)
+        w, _ = screen._estimate_size()
+        # max_label 4 + 2 (Trenner) + 6 (Ctrl+O) + 4 (Pad+Border) = 16, geklemmt auf min 16
+        assert w == 16
+
+    def test_width_with_icon(self) -> None:
+        items = [ContextMenuItem(id="a", label="Open", icon="📂")]
+        screen = ContextMenuScreen(items)
+        w, _ = screen._estimate_size()
+        # _format_label ergibt "📂 Open" (7 Zeichen) + 4 = 11, geklemmt auf min 16
+        assert w == 16
+
+    def test_height_scales_with_item_count(self) -> None:
+        items = [ContextMenuItem(id=f"id-{i}", label=f"Item {i}") for i in range(5)]
+        screen = ContextMenuScreen(items)
+        _, h = screen._estimate_size()
+        assert h == 5 + 2  # 5 Items + 2 Border
+
+    def test_height_includes_separators(self) -> None:
+        items = [
+            ContextMenuItem(id="a", label="A"),
+            ContextMenuItem.separator(),
+            ContextMenuItem(id="b", label="B"),
+        ]
+        screen = ContextMenuScreen(items)
+        _, h = screen._estimate_size()
+        assert h == 3 + 2  # 3 "Items" (inkl. Separator) + 2 Border

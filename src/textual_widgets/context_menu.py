@@ -158,14 +158,18 @@ class ContextMenuScreen(ModalScreen[str | None]):
         return item.label
 
     def on_mount(self) -> None:
-        """Positioniert das Menue am Klick-Punkt (mit Off-Screen-Schutz)."""
+        """Positioniert das Menue am Klick-Punkt (mit Off-Screen-Schutz).
+
+        Wichtig: `outer_size` ist beim ersten Mount noch (0, 0), weil das
+        Widget noch nicht gerendert wurde. Deshalb berechnen wir die
+        erwartete Groesse deterministisch aus den Items selbst — sonst
+        ragt das Menue beim ersten Oeffnen aus dem sichtbaren Bereich.
+        """
         container = self.query_one(Vertical)
         if self._at is not None:
             x, y = self._at
             term_w, term_h = self.app.size
-            # Geschaetzte Menue-Groesse, falls noch nicht gerendert
-            menu_w = container.outer_size.width or 30
-            menu_h = container.outer_size.height or len(self._items) + 2
+            menu_w, menu_h = self._estimate_size()
             # An Rand pinnen, damit das Menue nicht aus dem Terminal herausragt
             x = max(0, min(x, term_w - menu_w))
             y = max(0, min(y, term_h - menu_h))
@@ -174,6 +178,35 @@ class ContextMenuScreen(ModalScreen[str | None]):
             # Fallback: zentriert (z.B. bei Tastatur-Trigger ohne Click-Coords)
             self.styles.align = ("center", "middle")
         self.query_one(OptionList).focus()
+
+    def _estimate_size(self) -> tuple[int, int]:
+        """Berechnet die erwartete Menue-Groesse vor dem Render.
+
+        Beruecksichtigt:
+        - Maximale Label-Breite (inkl. Icon)
+        - Optionale Shortcut-Spalte rechts (mit 2 Leerzeichen Abstand)
+        - 2 Zellen Padding (CSS: padding: 0 1) horizontal
+        - 2 Zellen Border (CSS: border: thick) auf beiden Achsen
+        - min-width 16 / max-width 60 (CSS-Schranken)
+
+        Hoehe: 1 Zeile pro Item (auch Separator) + 2 Zellen Border.
+        """
+        visible = [i for i in self._items if not i.is_separator]
+        max_label = max(
+            (len(self._format_label(i)) for i in visible), default=0,
+        )
+        max_shortcut = max((len(i.shortcut) for i in visible), default=0)
+
+        content_w = max_label
+        if max_shortcut > 0:
+            content_w += 2 + max_shortcut
+
+        # +2 horizontal padding, +2 horizontal border
+        total_w = max(16, min(60, content_w + 4))
+        # Hoehe: jedes Item (inkl. Separatoren) belegt eine Zeile, +2 Border
+        total_h = max(3, len(self._items) + 2)
+
+        return (total_w, total_h)
 
     def on_option_list_option_selected(
         self, event: OptionList.OptionSelected,

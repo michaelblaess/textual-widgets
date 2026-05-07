@@ -230,6 +230,13 @@ dependencies = [
 - textual >= 0.40
 - rich >= 13.0
 
+## Verwendet von / Used by
+
+- **[retro-amp](https://github.com/michaelblaess/retro-amp)** — Terminal-Musikplayer
+  mit Retro-Charme. Nutzt `SearchInputWithHistory` fuer die globale Suche
+  und `ContextMenuScreen` fuer den Visualizer-Mode-Switch (Right-Click auf
+  den Spektral-Visualizer).
+
 ## Lizenz
 
 Apache License 2.0

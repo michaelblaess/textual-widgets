@@ -162,19 +162,24 @@ class ContextMenuScreen(ModalScreen[str | None]):
 
         Zwei-Phasen-Positionierung gegen das First-Open-Cut-Off-Problem:
 
-        1. Sofort: deterministische Schaetzung aus den Items
-           (`_estimate_size`). `outer_size` ist beim ersten Mount noch
-           (0, 0), weil das Widget noch nicht gerendert wurde.
-        2. Nach dem ersten Refresh: echte `outer_size` einsetzen und ggf.
-           neu positionieren — bevor der User interagieren kann.
+        1. Sofort: Menue UNSICHTBAR ins Layout einfuegen, mit Estimate-
+           Position. `outer_size` ist beim ersten Mount noch (0, 0).
+        2. Nach dem ersten Refresh: echte `outer_size` einsetzen, korrekt
+           positionieren, einblenden. Der User sieht das Menue erst,
+           wenn es an der richtigen Stelle steht — kein sichtbarer Sprung.
 
-        Ohne Phase 2 sieht man je nach Theme/Border-Default beim ersten
-        Oeffnen einen Teil des Menues abgeschnitten; ab dem zweiten Klick
-        stimmt es dann (weil Textual die Groesse inzwischen berechnet hat).
+        Hintergrund: Mit der Estimate allein wuerde der erste Frame an
+        einer leicht falschen Position erscheinen, danach `call_after_refresh`
+        zur korrekten Position springen. Mit `visibility: hidden` waehrend
+        Phase 1 wird genau dieser Sprung unsichtbar.
         """
         if self._at is not None:
+            container = self.query_one(Vertical)
+            # Phase 1: Layout berechnen aber nicht zeigen — vermeidet sichtbaren Sprung
+            container.styles.visibility = "hidden"
             self._apply_position()
-            self.call_after_refresh(self._apply_position)
+            # Phase 2: nach erstem Refresh ist outer_size echt — einblenden
+            self.call_after_refresh(self._reveal_at_real_position)
         else:
             # Fallback: zentriert (z.B. bei Tastatur-Trigger ohne Click-Coords)
             self.styles.align = ("center", "middle")
@@ -199,6 +204,12 @@ class ContextMenuScreen(ModalScreen[str | None]):
         x = max(0, min(x, term_w - menu_w))
         y = max(0, min(y, term_h - menu_h))
         container.styles.offset = (x, y)
+
+    def _reveal_at_real_position(self) -> None:
+        """Phase 2: echte Groesse ist verfuegbar — Position fix, dann sichtbar."""
+        self._apply_position()
+        container = self.query_one(Vertical)
+        container.styles.visibility = "visible"
 
     def _estimate_size(self) -> tuple[int, int]:
         """Berechnet die erwartete Menue-Groesse vor dem Render.

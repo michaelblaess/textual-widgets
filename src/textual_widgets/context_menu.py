@@ -160,59 +160,33 @@ class ContextMenuScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         """Positioniert das Menue am Klick-Punkt (mit Off-Screen-Schutz).
 
-        Zwei-Phasen-Positionierung gegen das First-Open-Cut-Off-Problem:
-
-        1. Sofort: Menue UNSICHTBAR ins Layout einfuegen, mit Estimate-
-           Position. `outer_size` ist beim ersten Mount noch (0, 0).
-        2. Nach dem ersten Refresh: echte `outer_size` einsetzen, korrekt
-           positionieren, einblenden. Der User sieht das Menue erst,
-           wenn es an der richtigen Stelle steht — kein sichtbarer Sprung.
-
-        Hintergrund: Mit der Estimate allein wuerde der erste Frame an
-        einer leicht falschen Position erscheinen, danach `call_after_refresh`
-        zur korrekten Position springen. Mit `visibility: hidden` waehrend
-        Phase 1 wird genau dieser Sprung unsichtbar.
+        Eine Phase, deterministisch: aus den Items eine bewusst leicht
+        ueberschaetzte Groesse berechnen und damit clampen. Lieber das
+        Menue 1-2 Zellen zu hoch ausgeben als unten abgeschnitten —
+        und kein Reposition-Sprung in einem zweiten Frame.
         """
         if self._at is not None:
-            container = self.query_one(Vertical)
-            # Phase 1: Layout berechnen aber nicht zeigen — vermeidet sichtbaren Sprung
-            container.styles.visibility = "hidden"
             self._apply_position()
-            # Phase 2: nach erstem Refresh ist outer_size echt — einblenden
-            self.call_after_refresh(self._reveal_at_real_position)
         else:
             # Fallback: zentriert (z.B. bei Tastatur-Trigger ohne Click-Coords)
             self.styles.align = ("center", "middle")
         self.query_one(OptionList).focus()
 
     def _apply_position(self) -> None:
-        """Positioniert das Menue. Nutzt echte `outer_size` wenn verfuegbar,
-        sonst die Schaetzung aus `_estimate_size()`.
-        """
+        """Positioniert den Menue-Container am Klick-Punkt mit Off-Screen-Schutz."""
         if self._at is None:
             return
         container = self.query_one(Vertical)
         x, y = self._at
         term_w, term_h = self.app.size
-        # Echte Groesse bevorzugen — beim ersten Mount ist sie 0, dann fallback
-        actual_w = container.outer_size.width
-        actual_h = container.outer_size.height
-        if actual_w > 0 and actual_h > 0:
-            menu_w, menu_h = actual_w, actual_h
-        else:
-            menu_w, menu_h = self._estimate_size()
+        menu_w, menu_h = self._estimate_size()
         x = max(0, min(x, term_w - menu_w))
         y = max(0, min(y, term_h - menu_h))
         container.styles.offset = (x, y)
 
-    def _reveal_at_real_position(self) -> None:
-        """Phase 2: echte Groesse ist verfuegbar — Position fix, dann sichtbar."""
-        self._apply_position()
-        container = self.query_one(Vertical)
-        container.styles.visibility = "visible"
-
     def _estimate_size(self) -> tuple[int, int]:
-        """Berechnet die erwartete Menue-Groesse vor dem Render.
+        """Berechnet die erwartete Menue-Groesse vor dem Render — bewusst
+        leicht UEBER-konservativ.
 
         Beruecksichtigt:
         - Maximale Label-Breite (inkl. Icon)
@@ -220,8 +194,13 @@ class ContextMenuScreen(ModalScreen[str | None]):
         - 2 Zellen Padding (CSS: padding: 0 1) horizontal
         - 2 Zellen Border (CSS: border: thick) auf beiden Achsen
         - min-width 16 / max-width 60 (CSS-Schranken)
+        - +2 Zellen Sicherheitsmarge horizontal und vertikal — falls Textuals
+          OptionList-Defaults (border tall, padding 0 1) trotz Override
+          durchschlagen oder das Theme zusaetzliche Zellen verbraucht.
 
-        Hoehe: 1 Zeile pro Item (auch Separator) + 2 Zellen Border.
+        Folge: das Menue erscheint im Worst Case 2 Zeilen hoeher als ideal
+        (statt direkt unter dem Cursor), bleibt aber immer vollstaendig
+        sichtbar. Kein Reposition-Sprung in einem spaeteren Frame.
         """
         visible = [i for i in self._items if not i.is_separator]
         max_label = max(
@@ -233,10 +212,10 @@ class ContextMenuScreen(ModalScreen[str | None]):
         if max_shortcut > 0:
             content_w += 2 + max_shortcut
 
-        # +2 horizontal padding, +2 horizontal border
-        total_w = max(16, min(60, content_w + 4))
-        # Hoehe: jedes Item (inkl. Separatoren) belegt eine Zeile, +2 Border
-        total_h = max(3, len(self._items) + 2)
+        # +4 fest (2 Padding + 2 Border) +2 Sicherheit
+        total_w = max(16, min(60, content_w + 6))
+        # +2 fest (Border) +2 Sicherheit
+        total_h = max(3, len(self._items) + 4)
 
         return (total_w, total_h)
 

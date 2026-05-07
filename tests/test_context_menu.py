@@ -104,8 +104,8 @@ class TestEstimateSize:
         items = [ContextMenuItem(id="a", label="Hallo Welt 12345678")]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        # 19 Zeichen Label + 4 (Padding + Border) = 23
-        assert w == 23
+        # 19 Zeichen Label + 6 (Padding + Border + Safety) = 25
+        assert w == 25
 
     def test_width_includes_shortcut_column(self) -> None:
         items = [
@@ -114,21 +114,21 @@ class TestEstimateSize:
         ]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        # max_label 4 + 2 (Trenner) + 6 (Ctrl+O) + 4 (Pad+Border) = 16, geklemmt auf min 16
-        assert w == 16
+        # max_label 4 + 2 (Trenner) + 6 (Ctrl+O) + 6 (Pad+Border+Safety) = 18
+        assert w == 18
 
     def test_width_with_icon(self) -> None:
         items = [ContextMenuItem(id="a", label="Open", icon="📂")]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        # _format_label ergibt "📂 Open" (7 Zeichen) + 4 = 11, geklemmt auf min 16
+        # _format_label ergibt "📂 Open" (7 Zeichen) + 6 = 13, geklemmt auf min 16
         assert w == 16
 
     def test_height_scales_with_item_count(self) -> None:
         items = [ContextMenuItem(id=f"id-{i}", label=f"Item {i}") for i in range(5)]
         screen = ContextMenuScreen(items)
         _, h = screen._estimate_size()
-        assert h == 5 + 2  # 5 Items + 2 Border
+        assert h == 5 + 4  # 5 Items + 2 Border + 2 Safety
 
     def test_height_includes_separators(self) -> None:
         items = [
@@ -138,4 +138,4 @@ class TestEstimateSize:
         ]
         screen = ContextMenuScreen(items)
         _, h = screen._estimate_size()
-        assert h == 3 + 2  # 3 "Items" (inkl. Separator) + 2 Border
+        assert h == 3 + 4  # 3 "Items" (inkl. Separator) + 2 Border + 2 Safety

@@ -91,7 +91,13 @@ class ContextMenuScreen(ModalScreen[str | None]):
         border: round $accent;
         padding: 0 1;
     }
-    ContextMenuScreen OptionList {
+    /* OptionList in allen States borderless halten — sonst flackern Textuals
+       Default-Borders kurz auf bei Focus-Wechsel oder Item-Auswahl ueber den
+       aeusseren Vertical-Border drueber. */
+    ContextMenuScreen OptionList,
+    ContextMenuScreen OptionList:focus,
+    ContextMenuScreen OptionList:hover,
+    ContextMenuScreen OptionList.-active {
         background: transparent;
         border: none;
         padding: 0;

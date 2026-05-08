@@ -214,31 +214,13 @@ Tastendruck musst du selbst ueber Bindings am uebergeordneten Widget
 abfangen. So bleibt das Menue mit deinem bestehenden Shortcut-Schema
 konsistent.
 
-## Installation
-
-```bash
-pip install "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git"
-```
-
-Oder in `pyproject.toml`:
-
-```toml
-dependencies = [
-    "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git",
-]
-```
-
-## Abhaengigkeiten
-
-- Python >= 3.12
-- textual >= 0.40
-- rich >= 13.0
-
 ### Splitter (VerticalSplitter / HorizontalSplitter)
 
 1-Zellen-breite/-hohe Trennlinien zwischen zwei Panels — per Maus-Drag laesst
 sich die Groesse des angrenzenden Panels veraendern. Vergleichbar mit den
-Splittern in IDEs / VSCode.
+Splittern in IDEs / VSCode. Ein zentrierter Drag-Handle (gestrichelt:
+`┊` vertikal, `┄` horizontal) markiert die Greifzone visuell. Hover und
+aktiver Drag faerben den Splitter in `$accent`.
 
 | Widget | Beschreibung |
 |--------|-------------|
@@ -246,6 +228,7 @@ Splittern in IDEs / VSCode.
 | `HorizontalSplitter` | Horizontale Linie in einem `Vertical`-Container — Drag aendert die **Hoehe** des oberen Panels |
 
 **Features:**
+- Drag-Handle-Glyph (`┊` / `┄`) zentriert auf dem Splitter
 - Visuelles Feedback: Hover und aktiver Drag-State faerben den Splitter in `$accent`
 - Min/Max-Constraints (`min_size`, `max_size`) verhindern unsinnige Groessen
 - Target via `target_id` adressierbar oder automatisch als vorhergehendes
@@ -274,30 +257,43 @@ class MyApp(App):
     def on_vertical_splitter_resized(
         self, event: VerticalSplitter.Resized,
     ) -> None:
-        # Persistenz: Konsument speichert die Groesse
-        self._settings.set_panel_size(event.target_id, event.size)
-
-    def on_horizontal_splitter_resized(
-        self, event: HorizontalSplitter.Resized,
-    ) -> None:
+        # Persistenz uebernimmt der Konsument
         self._settings.set_panel_size(event.target_id, event.size)
 ```
 
-**CSS-Voraussetzung:** Das Target-Panel braucht eine **konkrete Groesse**
-(`width` bzw. `height` in Zellen oder Prozent), kein `1fr`, sonst kann das
-Drag-Resize nicht wirksam werden. Das gegenueberliegende Panel kann dagegen
-ruhig `1fr` haben — es nimmt den Restplatz.
+**CSS-Voraussetzung:** Das Target-Panel braucht eine Groesse die der Splitter
+ueberschreiben kann — das kann ein Prozentwert (`width: 30%`) als skalierbarer
+Default sein, der nach erstem Drag von Cells (`width: 30`) ueberschrieben wird.
+`width: 1fr` waere zu flexibel und wuerde direkt zurueckspringen. Das
+gegenueberliegende Panel kann ruhig `1fr` haben — es nimmt den Restplatz.
 
-**Hinweis Persistenz:** Beim App-Start kannst du die gespeicherte Groesse
-einfach via `widget.styles.width = saved_size` (bzw. `height`) wieder setzen.
-Die Library haelt sich vom Storage fern.
+## Installation
+
+```bash
+pip install "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git"
+```
+
+Oder in `pyproject.toml`:
+
+```toml
+dependencies = [
+    "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git",
+]
+```
+
+## Abhaengigkeiten
+
+- Python >= 3.12
+- textual >= 0.40
+- rich >= 13.0
 
 ## Verwendet von / Used by
 
 - **[retro-amp](https://github.com/michaelblaess/retro-amp)** — Terminal-Musikplayer
-  mit Retro-Charme. Nutzt `SearchInputWithHistory` fuer die globale Suche
-  und `ContextMenuScreen` fuer den Visualizer-Mode-Switch (Right-Click auf
-  den Spektral-Visualizer).
+  mit Retro-Charme. Nutzt `SearchInputWithHistory` (globale Suche mit
+  Lupen-Icon und Verlauf), `ContextMenuScreen` (Right-Click auf den
+  Spektral-Visualizer fuer Mode-Switch) und `VerticalSplitter` /
+  `HorizontalSplitter` (Maus-Drag zum Anpassen der Panel-Groessen).
 
 ## Lizenz
 

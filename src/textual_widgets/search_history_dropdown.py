@@ -206,20 +206,31 @@ class SearchInputWithHistory(Vertical):
         height: auto;
         layout: vertical;
     }
+    /* Icon-Modus: Wrapper traegt den gemeinsamen Border statt Input,
+       damit Icon und Input wie EINE Box wirken (analog Textual Command-Palette). */
     SearchInputWithHistory .search-row {
         layout: horizontal;
-        height: auto;
+        height: 3;
+        background: $surface;
+        border: tall $primary;
+    }
+    SearchInputWithHistory .search-row:focus-within {
+        background: $surface-darken-1;
     }
     SearchInputWithHistory .search-icon {
         width: auto;
         min-width: 4;
-        height: 3;
+        height: 1;
         content-align: center middle;
-        padding: 0 1;
+        background: transparent;
         color: $text-muted;
     }
     SearchInputWithHistory .search-row Input {
         width: 1fr;
+        height: 1;
+        border: none;
+        background: transparent;
+        padding: 0 1;
     }
     """
 

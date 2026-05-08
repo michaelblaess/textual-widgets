@@ -33,8 +33,17 @@ Usage:
 from __future__ import annotations
 
 from textual import events
+from textual.app import RenderResult
 from textual.message import Message
 from textual.widget import Widget
+
+
+# Drag-Handle-Glyphen — Box-Drawing "light quadruple dash" Zeichen, sehen wie
+# gestrichelte Linien aus und wirken intuitiv als Greifgriff.
+_VERTICAL_HANDLE_CHAR = "┊"
+_HORIZONTAL_HANDLE_CHAR = "┄"
+# Anzahl Zellen fuer den zentrierten Handle (Rest bleibt einfarbig)
+_HANDLE_SIZE = 4
 
 
 class _SplitterBase(Widget):
@@ -141,14 +150,27 @@ class VerticalSplitter(_SplitterBase):
         width: 1;
         height: 1fr;
         background: $surface-darken-1;
+        color: $text-muted;
     }
     VerticalSplitter:hover {
         background: $accent;
+        color: $text;
     }
     VerticalSplitter.-dragging {
         background: $accent;
+        color: $text;
     }
     """
+
+    def render(self) -> RenderResult:
+        """Zeichnet einen zentrierten Drag-Handle aus gestrichelten Zeichen."""
+        h = max(1, self.size.height)
+        handle_n = min(_HANDLE_SIZE, h)
+        pad_top = (h - handle_n) // 2
+        return "\n".join(
+            _VERTICAL_HANDLE_CHAR if pad_top <= i < pad_top + handle_n else " "
+            for i in range(h)
+        )
 
     def _current_size(self, target: Widget) -> int:
         return int(target.outer_size.width)
@@ -178,14 +200,25 @@ class HorizontalSplitter(_SplitterBase):
         width: 1fr;
         height: 1;
         background: $surface-darken-1;
+        color: $text-muted;
     }
     HorizontalSplitter:hover {
         background: $accent;
+        color: $text;
     }
     HorizontalSplitter.-dragging {
         background: $accent;
+        color: $text;
     }
     """
+
+    def render(self) -> RenderResult:
+        """Zeichnet einen zentrierten Drag-Handle aus gestrichelten Zeichen."""
+        w = max(1, self.size.width)
+        handle_n = min(_HANDLE_SIZE, w)
+        pad_left = (w - handle_n) // 2
+        pad_right = w - handle_n - pad_left
+        return " " * pad_left + _HORIZONTAL_HANDLE_CHAR * handle_n + " " * pad_right
 
     def _current_size(self, target: Widget) -> int:
         return int(target.outer_size.height)

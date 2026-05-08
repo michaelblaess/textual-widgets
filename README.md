@@ -234,6 +234,64 @@ dependencies = [
 - textual >= 0.40
 - rich >= 13.0
 
+### Splitter (VerticalSplitter / HorizontalSplitter)
+
+1-Zellen-breite/-hohe Trennlinien zwischen zwei Panels — per Maus-Drag laesst
+sich die Groesse des angrenzenden Panels veraendern. Vergleichbar mit den
+Splittern in IDEs / VSCode.
+
+| Widget | Beschreibung |
+|--------|-------------|
+| `VerticalSplitter` | Vertikale Linie in einem `Horizontal`-Container — Drag aendert die **Breite** des linken Panels |
+| `HorizontalSplitter` | Horizontale Linie in einem `Vertical`-Container — Drag aendert die **Hoehe** des oberen Panels |
+
+**Features:**
+- Visuelles Feedback: Hover und aktiver Drag-State faerben den Splitter in `$accent`
+- Min/Max-Constraints (`min_size`, `max_size`) verhindern unsinnige Groessen
+- Target via `target_id` adressierbar oder automatisch als vorhergehendes
+  Geschwister-Widget
+- Persistenz beim Konsumenten: nach jedem abgeschlossenen Drag wird eine
+  `Resized`-Message mit `target_id` und neuer `size` gepostet — die Library
+  speichert nichts selbst
+
+**Beispiel — IDE-aehnliches Layout:**
+
+```python
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal, Vertical
+from textual_widgets import VerticalSplitter, HorizontalSplitter
+
+class MyApp(App):
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield FolderBrowser(id="folder", classes="left-pane")
+            yield VerticalSplitter(target_id="folder", min_size=15, max_size=80)
+            with Vertical(classes="right-side"):
+                yield FileTable(id="files", classes="top-pane")
+                yield HorizontalSplitter(target_id="files", min_size=5)
+                yield Lyrics(classes="bottom-pane")
+
+    def on_vertical_splitter_resized(
+        self, event: VerticalSplitter.Resized,
+    ) -> None:
+        # Persistenz: Konsument speichert die Groesse
+        self._settings.set_panel_size(event.target_id, event.size)
+
+    def on_horizontal_splitter_resized(
+        self, event: HorizontalSplitter.Resized,
+    ) -> None:
+        self._settings.set_panel_size(event.target_id, event.size)
+```
+
+**CSS-Voraussetzung:** Das Target-Panel braucht eine **konkrete Groesse**
+(`width` bzw. `height` in Zellen oder Prozent), kein `1fr`, sonst kann das
+Drag-Resize nicht wirksam werden. Das gegenueberliegende Panel kann dagegen
+ruhig `1fr` haben — es nimmt den Restplatz.
+
+**Hinweis Persistenz:** Beim App-Start kannst du die gespeicherte Groesse
+einfach via `widget.styles.width = saved_size` (bzw. `height`) wieder setzen.
+Die Library haelt sich vom Storage fern.
+
 ## Verwendet von / Used by
 
 - **[retro-amp](https://github.com/michaelblaess/retro-amp)** — Terminal-Musikplayer

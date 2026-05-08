@@ -174,9 +174,22 @@ class DatePicker(Vertical):
         background: transparent;
         color: $accent;
         padding: 0;
+        text-style: bold;
+    }
+    /* Default Button:focus setzt `text-style: bold reverse` — das `reverse`
+       invertiert Vorder- und Hintergrundfarbe und erzeugt einen sichtbaren
+       Block, sobald der Button (z.B. beim Oeffnen des Modal-Dialogs) Focus
+       bekommt. Wir uebersteuern das explizit, damit die Nav-Buttons in jedem
+       State transparent bleiben. */
+    DatePicker .dp-nav-btn:focus,
+    DatePicker .dp-nav-btn.-active {
+        background: transparent;
+        text-style: bold;
+        border: none;
     }
     DatePicker .dp-nav-btn:hover {
         background: $accent 30%;
+        text-style: bold;
     }
     DatePicker .dp-month-label {
         width: 1fr;

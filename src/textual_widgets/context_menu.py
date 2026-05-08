@@ -88,7 +88,7 @@ class ContextMenuScreen(ModalScreen[str | None]):
         min-width: 16;
         max-width: 60;
         background: $surface;
-        border: thick $accent;
+        border: round $accent;
         padding: 0 1;
     }
     ContextMenuScreen OptionList {

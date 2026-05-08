@@ -105,6 +105,7 @@ class StorybookApp(App[None]):
     BINDINGS = [
         Binding("n,N", "next_story", "Next", key_display="n"),
         Binding("p,P", "prev_story", "Prev", key_display="p"),
+        Binding("t,T", "cycle_theme", "Theme", key_display="t"),
         Binding("ctrl+s", "screenshot", "Screenshot"),
         Binding("q,Q", "quit", "Quit", key_display="q"),
     ]
@@ -202,9 +203,26 @@ class StorybookApp(App[None]):
         self.sub_title = ""
 
     def action_screenshot(self) -> None:
-        """Speichert ein SVG-Screenshot der aktuellen Ansicht."""
+        """Save an SVG screenshot of the current view."""
         story_slug = (self.sub_title or "screenshot").lower().replace(" ", "-")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         filename = f"storybook-{story_slug}-{timestamp}.svg"
         self.save_screenshot(str(Path.cwd() / filename))
         self.notify(f"Saved {filename}", title="Screenshot")
+
+    def action_cycle_theme(self) -> None:
+        """Cycle to the next registered theme. Falls back to Textual built-ins
+        if `textual-themes` is not installed."""
+        # `App.themes` is the public dict of registered themes (Textual >= 0.85).
+        # Fall back to the private attribute for older versions.
+        themes = getattr(self, "themes", None) or getattr(self, "_registered_themes", {})
+        names = sorted(themes.keys())
+        if not names:
+            return
+        try:
+            idx = names.index(self.theme)
+        except ValueError:
+            idx = -1
+        next_theme = names[(idx + 1) % len(names)]
+        self.theme = next_theme
+        self.notify(f"Theme: {next_theme}")

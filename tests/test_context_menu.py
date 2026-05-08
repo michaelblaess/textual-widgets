@@ -104,8 +104,8 @@ class TestEstimateSize:
         items = [ContextMenuItem(id="a", label="Hallo Welt 12345678")]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        # 19 Zeichen Label + 6 (Padding + Border + Safety) = 25
-        assert w == 25
+        # 19 Zeichen Label + 4 (Padding + Border) = 23
+        assert w == 23
 
     def test_width_includes_shortcut_column(self) -> None:
         items = [
@@ -114,14 +114,14 @@ class TestEstimateSize:
         ]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        # max_label 4 + 2 (Trenner) + 6 (Ctrl+O) + 6 (Pad+Border+Safety) = 18
-        assert w == 18
+        # max_label 4 + 2 (Trenner) + 6 (Ctrl+O) + 4 (Pad+Border) = 16, geklemmt auf min 16
+        assert w == 16
 
     def test_width_with_icon(self) -> None:
         items = [ContextMenuItem(id="a", label="Open", icon="📂")]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        # _format_label ergibt "📂 Open" (7 Zeichen) + 6 = 13, geklemmt auf min 16
+        # _format_label ergibt "📂 Open" (7 Zeichen) + 4 = 11, geklemmt auf min 16
         assert w == 16
 
     def test_height_scales_with_item_count(self) -> None:

@@ -218,8 +218,10 @@ class ContextMenuScreen(ModalScreen[str | None]):
         if max_shortcut > 0:
             content_w += 2 + max_shortcut
 
-        # +4 fest (2 Padding + 2 Border) +2 Sicherheit
-        total_w = max(16, min(60, content_w + 6))
+        # +4 fest (2 Padding + 2 Border) — kein Width-Safety mehr, da das den
+        # Off-Screen-Clamp nach links ueberschiessen liess. Hoehen-Safety bleibt,
+        # weil dort auch Cursor-Position-Effekte zaehlen.
+        total_w = max(16, min(60, content_w + 4))
         # +2 fest (Border) +2 Sicherheit
         total_h = max(3, len(self._items) + 4)
 

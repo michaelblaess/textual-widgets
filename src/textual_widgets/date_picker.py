@@ -160,10 +160,12 @@ class DatePicker(Vertical):
         height: auto;
         width: auto;
         padding: 0;
+        background: transparent;
     }
     DatePicker .dp-nav-row {
         height: 1;
         margin-bottom: 1;
+        background: transparent;
     }
     DatePicker .dp-nav-btn {
         min-width: 3;
@@ -181,11 +183,13 @@ class DatePicker(Vertical):
         text-align: center;
         color: $text;
         text-style: bold;
+        background: transparent;
     }
     DatePicker .dp-today-hint {
         text-align: center;
         color: $text-muted;
         margin-top: 1;
+        background: transparent;
     }
     """
 
@@ -223,7 +227,7 @@ class DatePicker(Vertical):
             id="dp-cal-grid",
         )
         yield Static(
-            f"Heute: {self._today.strftime('%d.%m.%Y')}",
+            f"Today: {self._today.strftime('%Y-%m-%d')}",
             classes="dp-today-hint",
         )
 
@@ -302,7 +306,7 @@ class DatePickerScreen(ModalScreen[str | None]):
     """
 
     BINDINGS = [
-        Binding("escape", "cancel", "Abbrechen"),
+        Binding("escape", "cancel", "Cancel"),
     ]
 
     def __init__(self, initial_date: str = "", **kwargs: object) -> None:
@@ -326,15 +330,15 @@ class DatePickerScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Static("Datum auswaehlen", id="dps-title")
+            yield Static("Select date", id="dps-title")
             yield DatePicker(
                 self._year, self._month,
                 selected_day=self._selected_day,
                 id="dps-picker",
             )
             with Horizontal(classes="dps-button-row"):
-                yield Button("Heute", variant="primary", id="dps-today")
-                yield Button("Abbrechen", id="dps-cancel")
+                yield Button("Today", variant="primary", id="dps-today")
+                yield Button("Cancel", id="dps-cancel")
 
     def on_date_picker_date_selected(self, event: DatePicker.DateSelected) -> None:
         """Tag wurde ausgewaehlt."""

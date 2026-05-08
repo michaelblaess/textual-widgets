@@ -119,13 +119,12 @@ class _SplitterBase(Widget):
             self.post_message(self.Resized(target.id, self._current_size(target)))
         event.stop()
 
-    # Subklassen ueberschreiben:
+    # Subklassen muessen `on_mouse_move` und `_current_size` definieren.
+    # Wichtig: `on_mouse_move` darf NICHT in dieser Basisklasse stehen —
+    # Textual dispatcht `on_*`-Handler ueber die gesamte MRO und ruft sonst
+    # die Basisversion zusaetzlich zur Subklassen-Implementierung auf.
     def _current_size(self, target: Widget) -> int:
         """Liest die aktuelle Groesse (Breite/Hoehe) des Targets."""
-        raise NotImplementedError
-
-    def on_mouse_move(self, event: events.MouseMove) -> None:
-        """Beim Dragging Target-Groesse anhand der Mausposition setzen."""
         raise NotImplementedError
 
 

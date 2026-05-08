@@ -1,43 +1,64 @@
 # textual-widgets
 
-Wiederverwendbare [Textual](https://textual.textualize.io/) Widgets fuer TUI-Anwendungen.
-
 Reusable [Textual](https://textual.textualize.io/) widgets for terminal user interfaces.
+
+Wiederverwendbare [Textual](https://textual.textualize.io/) Widgets für Terminal-Benutzeroberflächen.
+
+## Quick Start / Schnellstart
+
+```bash
+# Linux / macOS
+./setup.sh
+./run.sh
+
+# Windows (CMD)
+setup.bat
+run.bat
+
+# Windows (PowerShell)
+.\setup.bat
+.\run.ps1
+```
+
+`setup` creates a `.venv` and installs the package with development and storybook dependencies. `run` launches the storybook app.
+
+`setup` legt eine `.venv` an und installiert das Paket inklusive Entwicklungs- und Storybook-Abhängigkeiten. `run` startet die Storybook-App.
 
 ## Storybook
 
 ```bash
 python -m textual_widgets.storybook
+# or via the installed console script:
+textual-widgets-storybook
 ```
 
-Startet eine interaktive Showcase-App mit allen Widgets — wechselbare Themes (Ctrl+P), Live-Beispiele, Code-Snippets. Ideal zum Ausprobieren vor der Integration.
+An interactive showcase app with one tab per widget — live demos, code snippets, and result labels that update as you interact. Theme switcher via `Ctrl+P → "theme"` (with the `[storybook]` extra installed, retro themes from [textual-themes](https://github.com/michaelblaess/textual-themes) are available too).
 
-Launches an interactive showcase app with every widget — switchable themes (Ctrl+P), live examples, code snippets. Perfect for trying things out before wiring them into your app.
+Eine interaktive Showcase-App mit einem Tab pro Widget — Live-Demos, Code-Snippets und Status-Anzeigen, die sich beim Interagieren live aktualisieren. Theme-Wechsel über `Strg+P → "theme"` (mit installiertem `[storybook]`-Extra stehen zusätzlich die Retro-Themes aus [textual-themes](https://github.com/michaelblaess/textual-themes) zur Verfügung).
 
-## Widgets / Widgets
+## Widgets
 
 ### DatePicker
 
-Kalender-basierter Datums-Picker mit deutschen Monatsnamen, Wochenend-Hervorhebung und Klick-Auswahl.
+Calendar-based date picker with month names, weekend highlighting, and click-to-select.
 
-Calendar-based date picker with German month names, weekend highlighting and click-to-select.
+Kalender-basierter Datums-Picker mit Monatsnamen, Wochenend-Hervorhebung und Klick-Auswahl.
 
-Drei Abstraktionsstufen / Three abstraction levels:
-
-| Widget | Beschreibung / Description |
+| Widget | Description / Beschreibung |
 |--------|--------------------------|
-| `CalendarGrid` | Reines Kalender-Grid (Rich Text) zum Einbetten / Pure calendar grid for embedding |
-| `DatePicker` | Grid + Monats-/Jahresnavigation / Grid + month/year navigation |
-| `DatePickerScreen` | Modaler Dialog / Modal dialog |
+| `CalendarGrid` | Pure calendar grid for embedding / Reines Kalender-Grid zum Einbetten |
+| `DatePicker` | Grid + month/year navigation / Grid mit Monats- und Jahresnavigation |
+| `DatePickerScreen` | Modal dialog / Modaler Dialog |
 
 **Features:**
-- Deutsche Monatsnamen und Wochentage (Mo-So) / German month names and weekdays
-- Wochenenden farblich hervorgehoben / Weekends colour-highlighted
-- Heutiges Datum unterstrichen / Today's date underlined
-- Ausgewaehltes Datum invers / Selected date inversed
-- Monats- und Jahresnavigation `<` `>` `<<` `>>` / Month and year navigation
-- "Heute"-Schnellauswahl / "Today" shortcut
-- Klick auf Tag gibt `YYYY-MM-DD` zurueck / Click returns ISO date
+- German month names and weekdays (Mon–Sun)
+- Deutsche Monatsnamen und Wochentage (Mo–So)
+- Weekends colour-highlighted, today underlined, selected date inversed
+- Wochenenden farblich hervorgehoben, heutiges Datum unterstrichen, ausgewähltes Datum invers
+- Month and year navigation `<` `>` `<<` `>>`, "Today" shortcut
+- Monats- und Jahresnavigation `<` `>` `<<` `>>`, "Heute"-Schnellauswahl
+- Click on day returns ISO date `YYYY-MM-DD`
+- Klick auf einen Tag liefert ein ISO-Datum `YYYY-MM-DD`
 
 ```python
 from textual_widgets import DatePickerScreen
@@ -55,24 +76,26 @@ def _on_date_selected(self, selected: str | None) -> None:
 
 ### SearchHistoryDropdown / SearchInputWithHistory
 
-Such-Verlauf-Dropdown mit Substring-Filter und Treffer-Hervorhebung.
-`SearchInputWithHistory` ist die fertig verdrahtete Variante mit optionalem permanentem Icon-Praefix.
+Search-history dropdown with substring filtering and match highlighting. `SearchInputWithHistory` is the prewired variant with an optional permanent icon prefix.
 
-Search-history dropdown with substring filtering and match highlighting.
-`SearchInputWithHistory` is the prewired variant with an optional permanent icon prefix.
+Such-Verlauf-Dropdown mit Substring-Filter und Treffer-Hervorhebung. `SearchInputWithHistory` ist die fertig verdrahtete Variante mit optionalem permanentem Icon-Präfix.
 
-| Widget | Beschreibung / Description |
+| Widget | Description / Beschreibung |
 |--------|--------------------------|
-| `SearchHistoryDropdown` | OptionList mit Filter + Highlighting / OptionList with filter + highlighting |
-| `SearchInputWithHistory` | Input + Dropdown verdrahtet, optional mit Icon / Input + dropdown wired together, optional icon |
+| `SearchHistoryDropdown` | OptionList with filter + highlighting / OptionList mit Filter und Hervorhebung |
+| `SearchInputWithHistory` | Input + dropdown wired together, optional icon / Input und Dropdown verdrahtet, optional mit Icon |
 
 **Features:**
-- Substring-Filter (case-insensitive) waehrend des Tippens / Live substring filter while typing
-- Treffer hervorgehoben (Accent, fett) / Matches highlighted in accent + bold
-- Pfeile/Maus zur Auswahl, `Enter` uebernimmt + submitet / Arrows/mouse to pick, Enter selects and submits
-- `Delete` loescht Eintrag aus dem Verlauf / Delete removes an entry
-- `Escape` schliesst Dropdown / Escape closes dropdown
-- Optional: permanentes Icon-Praefix (`icon="🔍"`) — wie Textual Command-Palette / Optional permanent icon prefix like the command palette
+- Live substring filter (case-insensitive) while typing
+- Substring-Filter (case-insensitive) während des Tippens
+- Matches highlighted in accent + bold
+- Treffer hervorgehoben in Akzentfarbe und fett
+- Arrow keys / mouse to pick, Enter selects and submits
+- Pfeil-Tasten oder Maus zur Auswahl, `Enter` übernimmt und sendet
+- Delete removes an entry from the history
+- `Entf` löscht einen Eintrag aus dem Verlauf
+- Optional permanent icon prefix (`icon="🔍"`) — like the Textual command palette
+- Optional permanentes Icon-Präfix (`icon="🔍"`) — wie die Textual Command-Palette
 
 ```python
 from textual.widgets import Input
@@ -92,7 +115,6 @@ class MyApp(App):
         if not query:
             return
         self._history.add(query)
-        # Refresh dropdown:
         wrapper = self.query_one("#global-search", SearchInputWithHistory)
         wrapper.set_entries(self._history.list_recent(20))
         # ... start search ...
@@ -100,24 +122,30 @@ class MyApp(App):
 
 ### ContextMenu
 
-Wiederverwendbares Kontextmenue als ModalScreen. Items werden als Liste von `ContextMenuItem` deklariert; das Widget uebernimmt Layout, Cursor-Positionierung, Tastatur-Navigation und Theme-Farben.
-
 Reusable context menu modal screen. Items are declared as a list of `ContextMenuItem`; the widget handles layout, cursor positioning, keyboard navigation, and theme colours.
 
-| Widget | Beschreibung / Description |
+Wiederverwendbares Kontextmenü als ModalScreen. Items werden als Liste von `ContextMenuItem` deklariert; das Widget übernimmt Layout, Cursor-Positionierung, Tastatur-Navigation und Theme-Farben.
+
+| Widget | Description / Beschreibung |
 |--------|--------------------------|
-| `ContextMenuItem` | Dataclass: `id`, `label`, optional `icon`, `shortcut`, `enabled` |
-| `ContextMenuScreen` | Modaler Dialog mit OptionList / Modal dialog with OptionList |
+| `ContextMenuItem` | Dataclass with `id`, `label`, optional `icon`, `shortcut`, `enabled` / Dataclass mit `id`, `label`, optional `icon`, `shortcut`, `enabled` |
+| `ContextMenuScreen` | Modal dialog with OptionList / Modaler Dialog mit OptionList |
 
 **Features:**
-- Positionierung am Maus-Cursor / Positioned at the mouse cursor
-- Off-Screen-Schutz: Menue wird an den Terminal-Rand gepinnt / Off-screen guard pins the menu to the terminal edge
-- Optional zentriert (Tastatur-Trigger) / Optional centered (keyboard trigger)
-- Icons als Praefix (Emoji oder Unicode) / Icons as prefix (emoji or unicode)
-- Shortcuts rechtsbuendig in `dim` (reine Anzeige) / Shortcuts right-aligned in dim — display only
-- Disabled Items werden ausgegraut / Disabled items rendered greyed
-- Separator-Trennlinien via `ContextMenuItem.separator()` / Separator lines via factory
-- ESC oder Click ausserhalb → `None` / ESC or click outside → `None`
+- Positioned at the mouse cursor (`at=(event.screen_x, event.screen_y)`)
+- Positionierung am Maus-Cursor (`at=(event.screen_x, event.screen_y)`)
+- Off-screen guard pins the menu to the terminal edge if necessary
+- Off-Screen-Schutz pinnt das Menü bei Bedarf an den Terminal-Rand
+- Optional centered fallback for keyboard-triggered menus
+- Optional zentriert als Fallback für Tastatur-Trigger
+- Icons as prefix (emoji or unicode), shortcuts right-aligned in dim (display only)
+- Icons als Präfix (Emoji oder Unicode), Shortcuts rechtsbündig in dim (reine Anzeige)
+- Disabled items rendered greyed out, not selectable
+- Deaktivierte Items werden ausgegraut und sind nicht wählbar
+- Separators via `ContextMenuItem.separator()`
+- Trennlinien über `ContextMenuItem.separator()`
+- ESC or click outside dismisses with `None`
+- ESC oder Klick außerhalb schließt mit `None`
 
 ```python
 from textual.events import Click
@@ -140,30 +168,36 @@ class FolderBrowser(Tree):
 
     def _on_menu_action(self, action_id: str | None) -> None:
         if action_id is None:
-            return
+            return  # ESC or outside-click
         # ... handle action ...
 ```
 
-**Hinweis zu Shortcuts / About shortcuts:** Das `shortcut`-Feld wird nur angezeigt — den Tastendruck muss der Konsument selbst ueber Bindings binden.
-The `shortcut` field is display-only — the consumer wires the keypress via Bindings.
+The `shortcut` field is **display-only** — the consumer wires the keypress via Textual `Bindings`.
+
+Das `shortcut`-Feld ist **reine Anzeige** — den Tastendruck verdrahtet der Konsument selbst über Textual-`Bindings`.
 
 ### Splitter (VerticalSplitter / HorizontalSplitter)
 
-1-Zellen-breite/-hohe Trennlinien zwischen zwei Panels — per Maus-Drag laesst sich die Groesse des angrenzenden Panels veraendern. Vergleichbar mit den Splittern in IDEs / VS Code. Ein zentrierter Drag-Handle (gestrichelt: `┊` vertikal, `┄` horizontal) markiert die Greifzone visuell.
+1-cell-wide / -tall dividers between two panels — drag with the mouse to resize the adjacent panel. Comparable to the splitters in IDEs / VS Code. A centered drag handle (`┊` vertical, `┄` horizontal) marks the grab zone visually.
 
-1-cell-wide/tall dividers between two panels — drag with the mouse to resize the adjacent panel. Comparable to the splitters in IDEs / VS Code. A centered drag handle (`┊` vertical, `┄` horizontal) marks the grab zone visually.
+1-Zellen-breite / -hohe Trennlinien zwischen zwei Panels — per Maus-Drag lässt sich die Größe des angrenzenden Panels ändern. Vergleichbar mit den Splittern in IDEs / VS Code. Ein zentrierter Drag-Handle (`┊` vertikal, `┄` horizontal) markiert die Greifzone visuell.
 
-| Widget | Beschreibung / Description |
+| Widget | Description / Beschreibung |
 |--------|--------------------------|
-| `VerticalSplitter` | Vertikale Linie in `Horizontal` — aendert die Breite des linken Panels / Vertical line in a Horizontal container — adjusts the width of the left panel |
-| `HorizontalSplitter` | Horizontale Linie in `Vertical` — aendert die Hoehe des oberen Panels / Horizontal line in a Vertical container — adjusts the height of the top panel |
+| `VerticalSplitter` | Vertical line in a `Horizontal` container — adjusts the width of the left panel / Vertikale Linie in `Horizontal` — ändert die Breite des linken Panels |
+| `HorizontalSplitter` | Horizontal line in a `Vertical` container — adjusts the height of the top panel / Horizontale Linie in `Vertical` — ändert die Höhe des oberen Panels |
 
 **Features:**
-- Drag-Handle-Glyph zentriert auf dem Splitter / Centered drag-handle glyph
-- Hover/Drag-State faerbt den Splitter in `$accent` / Hover/drag state colours the splitter in accent
-- `min_size` / `max_size`-Constraints / Min/max size constraints
-- Target via `target_id` oder vorhergehender Sibling / Target via id or previous sibling
-- `Resized`-Message fuer Persistenz beim Konsumenten / Resized message for the consumer to persist sizes
+- Centered drag-handle glyph
+- Zentrierter Drag-Handle-Glyph
+- Hover and active drag colour the splitter in `$accent`
+- Hover und aktiver Drag färben den Splitter in `$accent`
+- `min_size` / `max_size` constraints
+- `min_size`- und `max_size`-Beschränkungen
+- Target via `target_id` or as the previous DOM sibling
+- Target über `target_id` oder als vorhergehendes Geschwister im DOM
+- `Resized` message after drag — consumer persists the new size
+- `Resized`-Message nach dem Drag — der Konsument persistiert die neue Größe
 
 ```python
 from textual.containers import Horizontal, Vertical
@@ -185,8 +219,9 @@ class MyApp(App):
         self._settings.set_panel_size(event.target_id, event.size)
 ```
 
-**CSS-Voraussetzung / CSS requirement:** Das Target-Panel braucht eine vom Splitter ueberschreibbare Groesse (Prozent-Default oder Cells-Default sind beide OK, `1fr` waere zu flexibel).
-The target panel needs a size the splitter can override (percent or cells default; `1fr` is too flexible).
+**CSS requirement:** the target panel needs a size the splitter can override (a percent or cells default both work; `1fr` is too flexible).
+
+**CSS-Voraussetzung:** Das Target-Panel braucht eine Größe, die der Splitter überschreiben kann (Prozent- oder Zellen-Default sind beide in Ordnung, `1fr` wäre zu flexibel).
 
 ## Installation
 
@@ -194,13 +229,13 @@ The target panel needs a size the splitter can override (percent or cells defaul
 pip install "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git"
 ```
 
-Mit Storybook und Retro-Themes / With storybook and retro themes:
+With storybook and retro themes / Mit Storybook und Retro-Themes:
 
 ```bash
 pip install "textual-widgets[storybook] @ git+https://github.com/michaelblaess/textual-widgets.git"
 ```
 
-Oder in `pyproject.toml` / Or in `pyproject.toml`:
+Or in `pyproject.toml` / Oder in `pyproject.toml`:
 
 ```toml
 dependencies = [
@@ -208,24 +243,19 @@ dependencies = [
 ]
 ```
 
-## Abhaengigkeiten / Dependencies
+## Dependencies / Abhängigkeiten
 
-- Python >= 3.12
-- textual >= 0.40
-- rich >= 13.0
-- *(optional, fuer / for `[storybook]`)* `textual-themes`
+- Python ≥ 3.12
+- textual ≥ 0.40
+- rich ≥ 13.0
+- *(optional, for / für `[storybook]`)* `textual-themes`
 
-## Verwendet von / Used by
+## Used by / Verwendet von
 
-- **[retro-amp](https://github.com/michaelblaess/retro-amp)** — Terminal-Musikplayer mit Retro-Charme.
-  Nutzt `SearchInputWithHistory` (globale Suche mit Lupen-Icon und Verlauf),
-  `ContextMenuScreen` (Right-Click auf den Spektral-Visualizer fuer Mode-Switch)
-  und `VerticalSplitter` / `HorizontalSplitter` (Maus-Drag zum Anpassen der
-  Panel-Groessen). /
-  Terminal music player with retro charm. Uses `SearchInputWithHistory` for
-  global search, `ContextMenuScreen` for the visualizer mode switch, and the
-  `Splitter` widgets for the resizable panel layout.
+- **[retro-amp](https://github.com/michaelblaess/retro-amp)** — Terminal music player with retro charm. Uses `SearchInputWithHistory` for global search, `ContextMenuScreen` for the visualizer mode switch, and the splitter widgets for the resizable panel layout.
 
-## Lizenz / License
+  Terminal-Musikplayer mit Retro-Charme. Nutzt `SearchInputWithHistory` für die globale Suche, `ContextMenuScreen` für den Visualizer-Mode-Switch und die Splitter-Widgets für anpassbare Panel-Größen.
+
+## License / Lizenz
 
 Apache License 2.0

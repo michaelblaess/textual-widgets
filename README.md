@@ -88,6 +88,9 @@ Zwei Abstraktionsstufen:
 - `Delete` loescht Eintrag aus dem Verlauf (Persistenz beim Host)
 - `Escape` schliesst das Dropdown
 - Sendet weiterhin `Input.Submitted` — bestehende Submit-Handler bleiben
+- Optional: permanentes Icon-Praefix links vom Input (`icon="🔍"`),
+  bleibt auch sichtbar wenn Text eingegeben ist — analog zur Textual
+  Command Palette
 
 **Beispiel — SearchInputWithHistory (Drop-in):**
 
@@ -98,6 +101,7 @@ from textual_widgets import SearchInputWithHistory
 class MyApp(App):
     def compose(self) -> ComposeResult:
         yield SearchInputWithHistory(
+            icon="🔍",                   # permanent sichtbar (auch mit Text)
             placeholder="Search ...",
             entries=self._history_repo.list_recent(20),  # initiale Liste
             id="global-search",

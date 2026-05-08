@@ -17,9 +17,9 @@ from rich.text import Text
 from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical
+from textual.containers import Horizontal, Vertical
 from textual.message import Message
-from textual.widgets import Input, OptionList
+from textual.widgets import Input, OptionList, Static
 from textual.widgets.option_list import Option
 
 
@@ -206,6 +206,21 @@ class SearchInputWithHistory(Vertical):
         height: auto;
         layout: vertical;
     }
+    SearchInputWithHistory .search-row {
+        layout: horizontal;
+        height: auto;
+    }
+    SearchInputWithHistory .search-icon {
+        width: auto;
+        min-width: 4;
+        height: 3;
+        content-align: center middle;
+        padding: 0 1;
+        color: $text-muted;
+    }
+    SearchInputWithHistory .search-row Input {
+        width: 1fr;
+    }
     """
 
     class HistoryEntrySelected(Message):
@@ -230,8 +245,22 @@ class SearchInputWithHistory(Vertical):
         input_id: str = "search-input",
         dropdown_id: str = "search-dropdown",
         highlight_style: str = "bold",
+        icon: str = "",
         **kwargs: object,
     ) -> None:
+        """Initialisiert das Such-Eingabefeld mit Verlauf.
+
+        Args:
+            placeholder: Hinweistext im leeren Input.
+            entries: Initiale Verlaufseintraege.
+            max_visible: Maximale Anzahl gleichzeitig sichtbarer Dropdown-Eintraege.
+            input_id: ID des inneren Input-Widgets.
+            dropdown_id: ID des inneren Dropdown-Widgets.
+            highlight_style: Rich-Style fuer Treffer-Hervorhebung im Dropdown.
+            icon: Optionales Praefix-Symbol (z.B. "🔍"), permanent links neben
+                dem Input sichtbar — auch wenn Text eingegeben ist. Leerstring
+                bedeutet kein Icon.
+        """
         super().__init__(**kwargs)
         self._placeholder = placeholder
         self._initial_entries = list(entries or [])
@@ -239,13 +268,19 @@ class SearchInputWithHistory(Vertical):
         self._input_id = input_id
         self._dropdown_id = dropdown_id
         self._highlight_style = highlight_style
+        self._icon = icon
         # Verhindert, dass on_input_changed das Dropdown wieder zeigt,
         # nachdem on_search_history_dropdown_entry_selected es gerade
         # geschlossen hat.
         self._suppress_show: bool = False
 
     def compose(self) -> ComposeResult:
-        yield Input(placeholder=self._placeholder, id=self._input_id)
+        if self._icon:
+            with Horizontal(classes="search-row"):
+                yield Static(self._icon, classes="search-icon")
+                yield Input(placeholder=self._placeholder, id=self._input_id)
+        else:
+            yield Input(placeholder=self._placeholder, id=self._input_id)
         yield SearchHistoryDropdown(
             entries=self._initial_entries,
             max_visible=self._max_visible,

@@ -32,9 +32,9 @@ python -m textual_widgets.storybook
 textual-widgets-storybook
 ```
 
-An interactive showcase app with one tab per widget — live demos, code snippets, and result labels that update as you interact. Theme switcher via `Ctrl+P → "theme"` (with the `[storybook]` extra installed, retro themes from [textual-themes](https://github.com/michaelblaess/textual-themes) are available too).
+Interactive showcase app with a sidebar listing every widget — pick one and see a live demo, a code snippet, and a result label that updates as you interact. Bindings: `n` / `p` to cycle through stories, `Ctrl+P` for the theme picker, `Ctrl+S` to save an SVG screenshot of the current view, `q` to quit. With the `[storybook]` extra installed, the retro themes from [textual-themes](https://github.com/michaelblaess/textual-themes) are registered too.
 
-Eine interaktive Showcase-App mit einem Tab pro Widget — Live-Demos, Code-Snippets und Status-Anzeigen, die sich beim Interagieren live aktualisieren. Theme-Wechsel über `Strg+P → "theme"` (mit installiertem `[storybook]`-Extra stehen zusätzlich die Retro-Themes aus [textual-themes](https://github.com/michaelblaess/textual-themes) zur Verfügung).
+Interaktive Showcase-App mit einer Sidebar, die alle Widgets listet — eines auswählen und Live-Demo, Code-Snippet und Status-Anzeige beobachten. Tasten: `n` / `p` blättern durch die Stories, `Strg+P` öffnet den Theme-Picker, `Strg+S` speichert einen SVG-Screenshot der aktuellen Ansicht, `q` beendet. Mit installiertem `[storybook]`-Extra sind die Retro-Themes aus [textual-themes](https://github.com/michaelblaess/textual-themes) automatisch registriert.
 
 ## Widgets
 

@@ -3,7 +3,11 @@
 Jede Story zeigt:
 - Eine kurze Beschreibung
 - Das Widget live, mit echten Beispiel-Daten
-- Ein Code-Snippet fuer den Einsatz
+- Ein Code-Snippet (raw, markup=False) fuer den Einsatz
+
+Wichtig zum Markup: Code-Snippets enthalten viele eckige Klammern (Listen,
+Type-Hints, ...) die Textual sonst als Markup-Tags interpretiert und
+Crashes ausloesen. Daher haben alle Code-Static-Widgets `markup=False`.
 """
 from __future__ import annotations
 
@@ -12,7 +16,7 @@ from datetime import date
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.widget import Widget
-from textual.widgets import Button, Input, Label, Static
+from textual.widgets import Button, Input, Static
 
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.date_picker import DatePicker, DatePickerScreen
@@ -21,8 +25,20 @@ from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
 
 
 # ----------------------------------------------------------------------
-# DatePicker Story
+# DatePicker
 # ----------------------------------------------------------------------
+
+
+_DATEPICKER_CODE = """\
+from textual_widgets import DatePicker, DatePickerScreen
+
+# Inline:
+yield DatePicker(year=2024, month=5, selected_day=21)
+
+# Modal:
+self.push_screen(DatePickerScreen(initial_date='2024-05-21'),
+                 callback=self._on_date)
+"""
 
 
 class DatePickerStory(Widget):
@@ -32,21 +48,11 @@ class DatePickerStory(Widget):
     DatePickerStory {
         layout: vertical;
         height: 1fr;
-        padding: 1 2;
     }
     DatePickerStory .demo-row {
         layout: horizontal;
         height: auto;
         margin-bottom: 1;
-    }
-    DatePickerStory #picked-date {
-        background: $surface-darken-1;
-        color: $accent;
-        padding: 0 2;
-        border: round $accent;
-        margin-bottom: 1;
-        height: 3;
-        content-align: left middle;
     }
     DatePickerStory DatePicker {
         width: 32;
@@ -54,44 +60,36 @@ class DatePickerStory(Widget):
         border: round $primary;
         margin-right: 2;
     }
+    DatePickerStory Button {
+        height: 3;
+    }
     """
 
     def compose(self) -> ComposeResult:
         with VerticalScroll():
+            yield Static("DatePicker / DatePickerScreen", classes="story-heading")
             yield Static(
-                "[bold]DatePicker / DatePickerScreen[/bold]",
-                classes="story-heading", markup=True,
-            )
-            yield Static(
-                "Kalender-basierter Datums-Picker — eingebettet als Widget oder modal als Screen.",
+                "Kalender-basierter Datums-Picker — eingebettet als Widget oder "
+                "modal als Screen. Beide liefern ein ISO-Datum (YYYY-MM-DD) "
+                "an einen Callback.",
                 classes="story-description",
             )
             yield Static(
-                f"[dim]Letztes Auswahl-Ergebnis:[/dim] [bold]{date.today().isoformat()}[/bold]",
-                id="picked-date", markup=True,
+                f"Letztes Auswahl-Ergebnis: {date.today().isoformat()}",
+                id="dp-result", classes="story-result",
             )
             with Horizontal(classes="demo-row"):
                 yield DatePicker(
                     year=date.today().year,
                     month=date.today().month,
                     selected_day=date.today().day,
-                    id="embedded-picker",
+                    id="dp-embedded",
                 )
-                yield Button("Open modal picker", id="open-modal", variant="primary")
-            yield Static(
-                "[dim]```python\n"
-                "from textual_widgets import DatePicker, DatePickerScreen\n\n"
-                "# Inline:\n"
-                "yield DatePicker(year=2024, month=5, selected_day=21)\n\n"
-                "# Modal:\n"
-                "self.push_screen(DatePickerScreen(initial_date='2024-05-21'),\n"
-                "                 callback=self._on_date)\n"
-                "```[/dim]",
-                classes="story-code", markup=True,
-            )
+                yield Button("Open modal picker", id="dp-open-modal", variant="primary")
+            yield Static(_DATEPICKER_CODE, markup=False, classes="story-code")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "open-modal":
+        if event.button.id == "dp-open-modal":
             self.app.push_screen(
                 DatePickerScreen(initial_date=date.today().isoformat()),
                 callback=self._on_picked,
@@ -106,16 +104,34 @@ class DatePickerStory(Widget):
 
     def _show_picked(self, date_str: str) -> None:
         try:
-            self.query_one("#picked-date", Static).update(
-                f"[dim]Letztes Auswahl-Ergebnis:[/dim] [bold]{date_str}[/bold]"
+            self.query_one("#dp-result", Static).update(
+                f"Letztes Auswahl-Ergebnis: {date_str}"
             )
         except Exception:
             pass
 
 
 # ----------------------------------------------------------------------
-# Search Story
+# Search
 # ----------------------------------------------------------------------
+
+
+_SEARCH_CODE = """\
+from textual_widgets import SearchInputWithHistory
+
+yield SearchInputWithHistory(
+    icon='\U0001f50d',
+    placeholder='Search ...',
+    entries=history.list_recent(20),
+    id='global-search',
+)
+
+def on_input_submitted(self, event):
+    query = event.value.strip()
+    if query:
+        history.add(query)
+        self.query_one('#global-search').set_entries(history.list_recent(20))
+"""
 
 
 class SearchStory(Widget):
@@ -125,15 +141,6 @@ class SearchStory(Widget):
     SearchStory {
         layout: vertical;
         height: 1fr;
-        padding: 1 2;
-    }
-    SearchStory #search-result {
-        background: $surface-darken-1;
-        color: $accent;
-        padding: 1 2;
-        border: round $accent;
-        margin-top: 1;
-        height: auto;
     }
     """
 
@@ -156,63 +163,43 @@ class SearchStory(Widget):
 
     def compose(self) -> ComposeResult:
         with VerticalScroll():
-            yield Static(
-                "[bold]SearchInputWithHistory[/bold]",
-                classes="story-heading", markup=True,
-            )
+            yield Static("SearchInputWithHistory", classes="story-heading")
             yield Static(
                 "Such-Input mit permanentem Lupen-Icon und Verlauf-Dropdown. "
-                "Beim Tippen filtert das Dropdown nach Substrings; Treffer werden hervorgehoben. "
-                "Probiere 'lana', 'kraf' oder 'amiga' — und Delete im Dropdown loescht den Eintrag.",
+                "Beim Tippen filtert das Dropdown nach Substrings; Treffer werden "
+                "hervorgehoben. Probiere 'lana', 'kraf' oder 'amiga' — und Delete im "
+                "Dropdown loescht den Eintrag.",
                 classes="story-description",
             )
             yield SearchInputWithHistory(
-                icon="🔍",
+                icon="\U0001f50d",
                 placeholder="Beispielsuche / Sample search ...",
                 entries=self._entries,
-                input_id="story-search-input",
-                dropdown_id="story-search-dropdown",
-                id="story-search",
+                input_id="search-story-input",
+                dropdown_id="search-story-dropdown",
+                id="search-story-wrapper",
             )
             yield Static(
-                "[dim]Submit (Enter) zeigt die Query unten an.[/dim]",
-                classes="story-description", markup=True,
+                "Letzter Submit: —",
+                id="search-result", classes="story-result",
             )
-            yield Static(
-                "[dim]Letzter Submit:[/dim] —",
-                id="search-result", markup=True,
-            )
-            yield Static(
-                "[dim]```python\n"
-                "from textual_widgets import SearchInputWithHistory\n\n"
-                "yield SearchInputWithHistory(\n"
-                "    icon='🔍',\n"
-                "    placeholder='Search ...',\n"
-                "    entries=history.list_recent(20),\n"
-                "    id='global-search',\n"
-                ")\n"
-                "```[/dim]",
-                classes="story-code", markup=True,
-            )
+            yield Static(_SEARCH_CODE, markup=False, classes="story-code")
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        if event.input.id != "story-search-input":
+        if event.input.id != "search-story-input":
             return
         query = event.value.strip()
         if not query:
             return
-        # Verlauf simulieren — Eintrag oben aufnehmen
         if query in self._entries:
             self._entries.remove(query)
         self._entries.insert(0, query)
         self._entries = self._entries[:20]
         try:
-            wrapper = self.query_one("#story-search", SearchInputWithHistory)
+            wrapper = self.query_one("#search-story-wrapper", SearchInputWithHistory)
             wrapper.set_entries(self._entries)
             wrapper.hide_dropdown()
-            self.query_one("#search-result", Static).update(
-                f"[dim]Letzter Submit:[/dim] [bold]{query}[/bold]"
-            )
+            self.query_one("#search-result", Static).update(f"Letzter Submit: {query}")
         except Exception:
             pass
 
@@ -222,15 +209,31 @@ class SearchStory(Widget):
         if event.entry in self._entries:
             self._entries.remove(event.entry)
         try:
-            wrapper = self.query_one("#story-search", SearchInputWithHistory)
+            wrapper = self.query_one("#search-story-wrapper", SearchInputWithHistory)
             wrapper.set_entries(self._entries)
         except Exception:
             pass
 
 
 # ----------------------------------------------------------------------
-# ContextMenu Story
+# ContextMenu
 # ----------------------------------------------------------------------
+
+
+_CONTEXTMENU_CODE = """\
+from textual_widgets import ContextMenuItem, ContextMenuScreen
+
+items = [
+    ContextMenuItem('open', 'Open', icon='\U0001f4c2', shortcut='Enter'),
+    ContextMenuItem('rename', 'Rename', icon='✎', shortcut='Ctrl+R'),
+    ContextMenuItem.separator(),
+    ContextMenuItem('delete', 'Delete', icon='✕'),
+]
+self.app.push_screen(
+    ContextMenuScreen(items, at=(event.screen_x, event.screen_y)),
+    callback=self._on_action,
+)
+"""
 
 
 class ContextMenuStory(Widget):
@@ -240,9 +243,8 @@ class ContextMenuStory(Widget):
     ContextMenuStory {
         layout: vertical;
         height: 1fr;
-        padding: 1 2;
     }
-    ContextMenuStory #click-area {
+    ContextMenuStory #cm-click-area {
         height: 12;
         background: $surface-darken-1;
         border: round $primary;
@@ -251,64 +253,38 @@ class ContextMenuStory(Widget):
         color: $text-muted;
         margin-bottom: 1;
     }
-    ContextMenuStory #click-area:hover {
+    ContextMenuStory #cm-click-area:hover {
         border: round $accent;
         color: $accent;
-    }
-    ContextMenuStory #last-action {
-        background: $surface-darken-1;
-        color: $accent;
-        padding: 1 2;
-        border: round $accent;
-        height: auto;
     }
     """
 
     def compose(self) -> ComposeResult:
         with VerticalScroll():
+            yield Static("ContextMenuScreen", classes="story-heading")
             yield Static(
-                "[bold]ContextMenuScreen[/bold]",
-                classes="story-heading", markup=True,
-            )
-            yield Static(
-                "Wiederverwendbares Kontext-Menue. Right-Click in den Bereich "
-                "unten, um das Menue an der Cursor-Position zu oeffnen.",
+                "Wiederverwendbares Kontext-Menue. Rechtsklick in den Bereich "
+                "unten oeffnet das Menue an der Cursor-Position.",
                 classes="story-description",
             )
+            yield Static("RIGHT-CLICK HERE", id="cm-click-area")
             yield Static(
-                "RIGHT-CLICK HERE",
-                id="click-area",
+                "Letzte Aktion: —",
+                id="cm-result", classes="story-result",
             )
-            yield Static(
-                "[dim]Letzte Aktion:[/dim] —",
-                id="last-action", markup=True,
-            )
-            yield Static(
-                "[dim]```python\n"
-                "from textual_widgets import ContextMenuItem, ContextMenuScreen\n\n"
-                "items = [\n"
-                "    ContextMenuItem('open', 'Open', icon='📂', shortcut='Enter'),\n"
-                "    ContextMenuItem('rename', 'Rename', icon='✎', shortcut='Ctrl+R'),\n"
-                "    ContextMenuItem.separator(),\n"
-                "    ContextMenuItem('delete', 'Delete', icon='✕'),\n"
-                "]\n"
-                "self.app.push_screen(\n"
-                "    ContextMenuScreen(items, at=(event.screen_x, event.screen_y)),\n"
-                "    callback=self._on_action,\n"
-                ")\n"
-                "```[/dim]",
-                classes="story-code", markup=True,
-            )
+            yield Static(_CONTEXTMENU_CODE, markup=False, classes="story-code")
 
     def on_click(self, event) -> None:
-        # Nur Right-Click in der Click-Area
         if event.button != 3:
             return
-        target = self.query_one("#click-area", Static)
+        try:
+            target = self.query_one("#cm-click-area", Static)
+        except Exception:
+            return
         if not target.region.contains(event.screen_x, event.screen_y):
             return
         items = [
-            ContextMenuItem("open", "Open", icon="📂", shortcut="Enter"),
+            ContextMenuItem("open", "Open", icon="\U0001f4c2", shortcut="Enter"),
             ContextMenuItem("rename", "Rename", icon="✎", shortcut="Ctrl+R"),
             ContextMenuItem.separator(),
             ContextMenuItem("delete", "Delete", icon="✕", shortcut="Del"),
@@ -323,18 +299,31 @@ class ContextMenuStory(Widget):
 
     def _on_action(self, action_id: str | None) -> None:
         try:
-            label = self.query_one("#last-action", Static)
+            label = self.query_one("#cm-result", Static)
         except Exception:
             return
         if action_id is None:
-            label.update("[dim]Letzte Aktion:[/dim] [italic]ESC / outside-click → cancelled[/italic]")
+            label.update("Letzte Aktion: cancelled (ESC / outside-click)")
         else:
-            label.update(f"[dim]Letzte Aktion:[/dim] [bold]{action_id}[/bold]")
+            label.update(f"Letzte Aktion: {action_id}")
 
 
 # ----------------------------------------------------------------------
-# Splitter Story
+# Splitter
 # ----------------------------------------------------------------------
+
+
+_SPLITTER_CODE = """\
+from textual_widgets import VerticalSplitter, HorizontalSplitter
+
+with Horizontal():
+    yield Panel(id='left', classes='left-pane')      # width: 30%
+    yield VerticalSplitter(target_id='left', min_size=15)
+    with Vertical():
+        yield Panel(id='top', classes='top-pane')    # height: 50%
+        yield HorizontalSplitter(target_id='top', min_size=3)
+        yield Panel(classes='bottom-pane')           # height: 1fr
+"""
 
 
 class SplitterStory(Widget):
@@ -344,82 +333,59 @@ class SplitterStory(Widget):
     SplitterStory {
         layout: vertical;
         height: 1fr;
-        padding: 1 2;
     }
-    SplitterStory #splitter-demo {
+    SplitterStory #sp-demo {
         layout: horizontal;
         height: 18;
         margin-bottom: 1;
     }
-    SplitterStory #demo-left {
+    SplitterStory #sp-left {
         width: 30%;
         min-width: 15;
         background: $surface-darken-1;
         border: round $primary;
         content-align: center middle;
     }
-    SplitterStory #demo-right {
+    SplitterStory #sp-right {
         width: 1fr;
         layout: vertical;
     }
-    SplitterStory #demo-top {
+    SplitterStory #sp-top {
         height: 50%;
         min-height: 3;
         background: $surface-darken-1;
         border: round $primary;
         content-align: center middle;
     }
-    SplitterStory #demo-bottom {
+    SplitterStory #sp-bottom {
         height: 1fr;
         background: $surface-darken-1;
         border: round $primary;
         content-align: center middle;
     }
-    SplitterStory #last-resize {
-        background: $surface-darken-1;
-        color: $accent;
-        padding: 1 2;
-        border: round $accent;
-        height: auto;
-    }
     """
 
     def compose(self) -> ComposeResult:
         with VerticalScroll():
+            yield Static("VerticalSplitter / HorizontalSplitter", classes="story-heading")
             yield Static(
-                "[bold]VerticalSplitter / HorizontalSplitter[/bold]",
-                classes="story-heading", markup=True,
-            )
-            yield Static(
-                "Drag-resizable Panels. Splitter haben einen zentrierten "
-                "Drag-Handle (┊ / ┄). Hover faerbt sie, Drag passt die "
-                "Groesse des Targets an.",
+                "Drag-resizable Panels mit zentriertem Drag-Handle. Hover faerbt "
+                "den Splitter, Drag passt die Groesse des Targets an. Nach jedem "
+                "Drag wird eine Resized-Message gepostet (siehe unten).",
                 classes="story-description",
             )
-            with Container(id="splitter-demo"):
-                yield Static("Left panel\n(width: 30%)", id="demo-left")
-                yield VerticalSplitter(target_id="demo-left", min_size=15)
-                with Vertical(id="demo-right"):
-                    yield Static("Top panel\n(height: 50%)", id="demo-top")
-                    yield HorizontalSplitter(target_id="demo-top", min_size=3)
-                    yield Static("Bottom panel\n(height: 1fr)", id="demo-bottom")
+            with Container(id="sp-demo"):
+                yield Static("Left panel\n(width: 30%)", id="sp-left")
+                yield VerticalSplitter(target_id="sp-left", min_size=15)
+                with Vertical(id="sp-right"):
+                    yield Static("Top panel\n(height: 50%)", id="sp-top")
+                    yield HorizontalSplitter(target_id="sp-top", min_size=3)
+                    yield Static("Bottom panel\n(height: 1fr)", id="sp-bottom")
             yield Static(
-                "[dim]Letzte Aenderung:[/dim] —",
-                id="last-resize", markup=True,
+                "Letzte Aenderung: —",
+                id="sp-result", classes="story-result",
             )
-            yield Static(
-                "[dim]```python\n"
-                "from textual_widgets import VerticalSplitter, HorizontalSplitter\n\n"
-                "with Horizontal():\n"
-                "    yield Panel(id='left', classes='left-pane')   # width: 30%\n"
-                "    yield VerticalSplitter(target_id='left', min_size=15)\n"
-                "    with Vertical():\n"
-                "        yield Panel(id='top', classes='top-pane') # height: 50%\n"
-                "        yield HorizontalSplitter(target_id='top', min_size=3)\n"
-                "        yield Panel(classes='bottom-pane')        # height: 1fr\n"
-                "```[/dim]",
-                classes="story-code", markup=True,
-            )
+            yield Static(_SPLITTER_CODE, markup=False, classes="story-code")
 
     def on_vertical_splitter_resized(
         self, event: VerticalSplitter.Resized,
@@ -433,9 +399,8 @@ class SplitterStory(Widget):
 
     def _show_resize(self, target: str, size: int, axis: str) -> None:
         try:
-            self.query_one("#last-resize", Static).update(
-                f"[dim]Letzte Aenderung:[/dim] "
-                f"[bold]{target}[/bold].{axis} = [bold]{size}[/bold] cells"
+            self.query_one("#sp-result", Static).update(
+                f"Letzte Aenderung: {target}.{axis} = {size} cells"
             )
         except Exception:
             pass

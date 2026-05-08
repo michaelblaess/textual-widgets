@@ -206,16 +206,19 @@ class SearchInputWithHistory(Vertical):
         height: auto;
         layout: vertical;
     }
-    /* Icon-Modus: Wrapper traegt den gemeinsamen Border statt Input,
-       damit Icon und Input wie EINE Box wirken (analog Textual Command-Palette). */
+    /* Icon-Modus: Wrapper traegt den gemeinsamen Rahmen statt Input,
+       damit Icon und Input wie EINE Box wirken (analog Textual Command-Palette).
+       Border standardmaessig unsichtbar ($background), nur bei Focus accent —
+       gleiches Pattern wie Textuals Default-Input. */
     SearchInputWithHistory .search-row {
         layout: horizontal;
         height: 3;
         background: $surface;
-        border: tall $primary;
+        border: tall $background;
     }
     SearchInputWithHistory .search-row:focus-within {
         background: $surface-darken-1;
+        border: tall $accent;
     }
     SearchInputWithHistory .search-icon {
         width: auto;

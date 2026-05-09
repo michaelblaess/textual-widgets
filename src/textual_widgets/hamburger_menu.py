@@ -273,7 +273,7 @@ class HamburgerMenu(Widget):
         self,
         items: list[HamburgerItem],
         bottom_items: list[HamburgerItem] | None = None,
-        collapsed_width: int = 4,
+        collapsed_width: int = 6,
         expanded_width: int = 26,
         toggle_icon: str = "≡",
         initial_expanded: bool = False,
@@ -322,8 +322,13 @@ class HamburgerMenu(Widget):
         # Apply initial width directly (no animation on first show)
         initial_w = self._expanded_width if self._initial_expanded else self._collapsed_width
         self.styles.width = initial_w
-        # Trigger reactive flow so all entries render correctly
+        # Sync the reactive — this only triggers the watcher when the value
+        # actually changes from its default. With initial_expanded=False
+        # (the default) it doesn't fire, so we render the entries explicitly
+        # afterwards. Otherwise the toggle and item icons stay empty until
+        # the user clicks toggle.
         self.expanded = self._initial_expanded
+        self._refresh_entries()
 
     # --- Public API ----------------------------------------------------
 

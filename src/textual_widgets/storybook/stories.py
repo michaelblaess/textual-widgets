@@ -420,13 +420,13 @@ class MyApp(App):
         with Horizontal():
             yield HamburgerMenu(
                 items=[
-                    HamburgerItem('new', 'New mail', icon='+'),
+                    HamburgerItem('new', 'New mail', icon='\U0001f4dd'),
                     HamburgerItem.group('Accounts'),
-                    HamburgerItem('inbox', 'Inbox', icon='M'),
-                    HamburgerItem('sent', 'Sent', icon='S'),
+                    HamburgerItem('inbox', 'Inbox', icon='\U0001f4e5'),
+                    HamburgerItem('sent', 'Sent', icon='\U0001f4e4'),
                 ],
                 bottom_items=[
-                    HamburgerItem('settings', 'Settings', icon='*'),
+                    HamburgerItem('settings', 'Settings', icon='⚙'),
                 ],
             )
             yield Container(id='main')
@@ -472,17 +472,17 @@ class HamburgerStory(Widget):
             with Container(id="hb-demo"):
                 yield HamburgerMenu(
                     items=[
-                        HamburgerItem("new", "New mail", icon="+"),
+                        HamburgerItem("new", "New mail", icon="📝"),
                         HamburgerItem.group("Accounts"),
-                        HamburgerItem("inbox", "Inbox", icon="M"),
-                        HamburgerItem("sent", "Sent", icon="S"),
-                        HamburgerItem("drafts", "Drafts", icon="D"),
+                        HamburgerItem("inbox", "Inbox", icon="📥"),
+                        HamburgerItem("sent", "Sent", icon="📤"),
+                        HamburgerItem("drafts", "Drafts", icon="📋"),
                         HamburgerItem.group("Folders"),
-                        HamburgerItem("archive", "Archive", icon="A"),
-                        HamburgerItem("trash", "Trash", icon="T"),
+                        HamburgerItem("archive", "Archive", icon="🗄"),
+                        HamburgerItem("trash", "Trash", icon="🗑"),
                     ],
                     bottom_items=[
-                        HamburgerItem("settings", "Settings", icon="*"),
+                        HamburgerItem("settings", "Settings", icon="⚙"),
                     ],
                     id="hb-menu",
                 )

@@ -45,7 +45,7 @@ class TestHamburgerMenuConstruction:
         menu = HamburgerMenu(items=[HamburgerItem("a", "A")])
         assert len(menu._items) == 1
         assert menu._bottom_items == []
-        assert menu._collapsed_width == 4
+        assert menu._collapsed_width == 6
         assert menu._expanded_width == 26
         assert menu._initial_expanded is False
 

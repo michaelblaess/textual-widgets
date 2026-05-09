@@ -420,13 +420,13 @@ class MyApp(App):
         with Horizontal():
             yield HamburgerMenu(
                 items=[
-                    HamburgerItem('new', 'New mail', icon='\U0001f4dd'),
+                    HamburgerItem('new', 'New mail', icon='✉️'),
                     HamburgerItem.group('Accounts'),
                     HamburgerItem('inbox', 'Inbox', icon='\U0001f4e5'),
                     HamburgerItem('sent', 'Sent', icon='\U0001f4e4'),
                 ],
                 bottom_items=[
-                    HamburgerItem('settings', 'Settings', icon='⚙'),
+                    HamburgerItem('settings', 'Settings', icon='🛠️'),
                 ],
             )
             yield Container(id='main')
@@ -472,17 +472,20 @@ class HamburgerStory(Widget):
             with Container(id="hb-demo"):
                 yield HamburgerMenu(
                     items=[
-                        HamburgerItem("new", "New mail", icon="📝"),
+                        # VS Code Activity-Bar-style: alle Icons sind der gleichen
+                        # 2-Zellen-Emoji-"Familie" (line/document/folder), damit
+                        # die collapsed Spalte einheitlich wirkt.
+                        HamburgerItem("new", "New mail", icon="✉️"),
                         HamburgerItem.group("Accounts"),
                         HamburgerItem("inbox", "Inbox", icon="📥"),
                         HamburgerItem("sent", "Sent", icon="📤"),
-                        HamburgerItem("drafts", "Drafts", icon="📋"),
+                        HamburgerItem("drafts", "Drafts", icon="📄"),
                         HamburgerItem.group("Folders"),
-                        HamburgerItem("archive", "Archive", icon="🗄"),
-                        HamburgerItem("trash", "Trash", icon="🗑"),
+                        HamburgerItem("archive", "Archive", icon="📦"),
+                        HamburgerItem("trash", "Trash", icon="🗑️"),
                     ],
                     bottom_items=[
-                        HamburgerItem("settings", "Settings", icon="⚙"),
+                        HamburgerItem("settings", "Settings", icon="🛠️"),
                     ],
                     id="hb-menu",
                 )

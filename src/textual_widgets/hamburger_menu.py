@@ -173,11 +173,19 @@ class _HamburgerEntry(Static, can_focus=True):
     def __init__(
         self,
         item: HamburgerItem,
+        *,
+        expanded: bool = False,
         is_toggle: bool = False,
         toggle_icon: str = "≡",
         **kwargs: object,
     ) -> None:
-        super().__init__("", **kwargs)
+        # Pre-compute the initial content so the entry already shows its icon
+        # the moment it is mounted. Relying on a post-mount refresh proved
+        # unreliable because the watcher only fires when the reactive value
+        # actually changes — for the default collapsed state that meant the
+        # entries stayed empty until the user clicked toggle.
+        content = self._compute_content(item, expanded, is_toggle, toggle_icon)
+        super().__init__(content, **kwargs)
         self._item = item
         self._is_toggle = is_toggle
         self._toggle_icon = toggle_icon
@@ -188,29 +196,31 @@ class _HamburgerEntry(Static, can_focus=True):
         if is_toggle:
             self.add_class("-toggle")
             self.can_focus = False
+        # Tooltip = label, especially useful when collapsed
+        if not is_toggle and not item.is_group_header and not item.is_separator:
+            self.tooltip = item.label
+
+    @staticmethod
+    def _compute_content(
+        item: HamburgerItem, expanded: bool, is_toggle: bool, toggle_icon: str,
+    ) -> str:
+        """Map the entry+state to the string we render."""
+        if is_toggle:
+            return toggle_icon
+        if item.is_separator:
+            return "─"
+        if item.is_group_header:
+            return item.label.upper() if expanded else " "
+        icon = item.icon or " "
+        return f"{icon}  {item.label}" if expanded else icon
 
     def render_for(self, expanded: bool) -> None:
-        """Re-render content based on the menu's expanded state."""
-        if self._is_toggle:
-            self.update(self._toggle_icon)
-            return
-        if self._item.is_separator:
-            self.update("─")
-            return
-        if self._item.is_group_header:
-            if expanded:
-                self.update(self._item.label.upper())
-            else:
-                self.update(" ")
-            return
-        # Normal item
-        icon = self._item.icon or " "
-        if expanded:
-            self.update(f"{icon}  {self._item.label}")
-        else:
-            self.update(icon)
-        # Tooltip = label, useful when collapsed
-        self.tooltip = self._item.label
+        """Re-render content for a new expanded state (called on toggle)."""
+        self.update(
+            self._compute_content(
+                self._item, expanded, self._is_toggle, self._toggle_icon,
+            )
+        )
 
     def on_click(self) -> None:
         """Click → activate. Group headers and separators are inert."""
@@ -306,17 +316,22 @@ class HamburgerMenu(Widget):
         # Toggle row at the top — virtual "item" with empty id
         yield _HamburgerEntry(
             HamburgerItem(id="", label="", icon=self._toggle_icon),
+            expanded=self._initial_expanded,
             is_toggle=True,
             toggle_icon=self._toggle_icon,
             id="hb-toggle",
         )
         with VerticalScroll(id="hb-items"):
             for idx, item in enumerate(self._items):
-                yield _HamburgerEntry(item, id=f"hb-top-{idx}")
+                yield _HamburgerEntry(
+                    item, expanded=self._initial_expanded, id=f"hb-top-{idx}",
+                )
         if self._bottom_items:
             with Vertical(id="hb-bottom"):
                 for idx, item in enumerate(self._bottom_items):
-                    yield _HamburgerEntry(item, id=f"hb-bot-{idx}")
+                    yield _HamburgerEntry(
+                        item, expanded=self._initial_expanded, id=f"hb-bot-{idx}",
+                    )
 
     def on_mount(self) -> None:
         # Apply initial width directly (no animation on first show)

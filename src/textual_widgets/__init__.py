@@ -1,6 +1,6 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.7.3"
+__version__ = "0.7.4"
 __author__ = "Michael Blaess"
 
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen

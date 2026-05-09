@@ -177,6 +177,7 @@ class _HamburgerEntry(Static, can_focus=True):
         expanded: bool = False,
         is_toggle: bool = False,
         toggle_icon: str = "≡",
+        show_tooltip: bool = False,
         **kwargs: object,
     ) -> None:
         # Pre-compute the initial content so the entry already shows its icon
@@ -196,8 +197,7 @@ class _HamburgerEntry(Static, can_focus=True):
         if is_toggle:
             self.add_class("-toggle")
             self.can_focus = False
-        # Tooltip = label, especially useful when collapsed
-        if not is_toggle and not item.is_group_header and not item.is_separator:
+        if show_tooltip and not is_toggle and not item.is_group_header and not item.is_separator:
             self.tooltip = item.label
 
     @staticmethod
@@ -288,6 +288,7 @@ class HamburgerMenu(Widget):
         toggle_icon: str = "≡",
         initial_expanded: bool = False,
         animate_duration: float = 0.15,
+        show_tooltips: bool = False,
         **kwargs: object,
     ) -> None:
         """Initialise the menu.
@@ -295,11 +296,15 @@ class HamburgerMenu(Widget):
         Args:
             items: Top-level entries in the scrollable upper section.
             bottom_items: Items docked to the bottom (e.g. Settings).
-            collapsed_width: Width in cells when collapsed (default 4).
+            collapsed_width: Width in cells when collapsed (default 6).
             expanded_width: Width in cells when expanded (default 26).
             toggle_icon: Symbol shown in the toggle row at the top.
             initial_expanded: Start expanded if True (default False).
             animate_duration: Seconds for the width animation (0 disables).
+            show_tooltips: If True, hovering a collapsed icon shows the
+                label as a tooltip. Off by default — tooltips compete
+                visually with the menu and the user can just expand the
+                menu to read labels.
         """
         super().__init__(**kwargs)
         self._items = list(items)
@@ -308,6 +313,7 @@ class HamburgerMenu(Widget):
         self._expanded_width = expanded_width
         self._toggle_icon = toggle_icon
         self._animate_duration = animate_duration
+        self._show_tooltips = show_tooltips
         # Set the reactive AFTER everything else, so watch_expanded can rely on
         # all attributes being present.
         self._initial_expanded = initial_expanded
@@ -319,18 +325,23 @@ class HamburgerMenu(Widget):
             expanded=self._initial_expanded,
             is_toggle=True,
             toggle_icon=self._toggle_icon,
+            show_tooltip=self._show_tooltips,
             id="hb-toggle",
         )
         with VerticalScroll(id="hb-items"):
             for idx, item in enumerate(self._items):
                 yield _HamburgerEntry(
-                    item, expanded=self._initial_expanded, id=f"hb-top-{idx}",
+                    item, expanded=self._initial_expanded,
+                    show_tooltip=self._show_tooltips,
+                    id=f"hb-top-{idx}",
                 )
         if self._bottom_items:
             with Vertical(id="hb-bottom"):
                 for idx, item in enumerate(self._bottom_items):
                     yield _HamburgerEntry(
-                        item, expanded=self._initial_expanded, id=f"hb-bot-{idx}",
+                        item, expanded=self._initial_expanded,
+                        show_tooltip=self._show_tooltips,
+                        id=f"hb-bot-{idx}",
                     )
 
     def on_mount(self) -> None:

@@ -420,13 +420,13 @@ class MyApp(App):
         with Horizontal():
             yield HamburgerMenu(
                 items=[
-                    HamburgerItem('new', 'New mail', icon='✉️'),
+                    HamburgerItem('new', 'New mail', icon='✎'),
                     HamburgerItem.group('Accounts'),
-                    HamburgerItem('inbox', 'Inbox', icon='\U0001f4e5'),
-                    HamburgerItem('sent', 'Sent', icon='\U0001f4e4'),
+                    HamburgerItem('inbox', 'Inbox', icon='↓'),
+                    HamburgerItem('sent', 'Sent', icon='↑'),
                 ],
                 bottom_items=[
-                    HamburgerItem('settings', 'Settings', icon='🛠️'),
+                    HamburgerItem('settings', 'Settings', icon='⚙'),
                 ],
             )
             yield Container(id='main')
@@ -472,20 +472,20 @@ class HamburgerStory(Widget):
             with Container(id="hb-demo"):
                 yield HamburgerMenu(
                     items=[
-                        # VS Code Activity-Bar-style: alle Icons sind der gleichen
-                        # 2-Zellen-Emoji-"Familie" (line/document/folder), damit
-                        # die collapsed Spalte einheitlich wirkt.
-                        HamburgerItem("new", "New mail", icon="✉️"),
+                        # VS Code Activity-Bar-Stil: monochrome 1-Zellen-Symbole
+                        # statt Color-Emojis. Einheitlich, modern, keine
+                        # Win95-Optik durch bunte Filing-Cabinet-Emojis.
+                        HamburgerItem("new", "New mail", icon="✎"),
                         HamburgerItem.group("Accounts"),
-                        HamburgerItem("inbox", "Inbox", icon="📥"),
-                        HamburgerItem("sent", "Sent", icon="📤"),
-                        HamburgerItem("drafts", "Drafts", icon="📄"),
+                        HamburgerItem("inbox", "Inbox", icon="↓"),
+                        HamburgerItem("sent", "Sent", icon="↑"),
+                        HamburgerItem("drafts", "Drafts", icon="▤"),
                         HamburgerItem.group("Folders"),
-                        HamburgerItem("archive", "Archive", icon="📦"),
-                        HamburgerItem("trash", "Trash", icon="🗑️"),
+                        HamburgerItem("archive", "Archive", icon="▦"),
+                        HamburgerItem("trash", "Trash", icon="⌫"),
                     ],
                     bottom_items=[
-                        HamburgerItem("settings", "Settings", icon="🛠️"),
+                        HamburgerItem("settings", "Settings", icon="⚙"),
                     ],
                     id="hb-menu",
                 )

@@ -1,10 +1,11 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.6.3"
+__version__ = "0.7.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.date_picker import CalendarGrid, DatePicker, DatePickerScreen
+from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
 from textual_widgets.search_history_dropdown import (
     SearchHistoryDropdown,
     SearchInputWithHistory,
@@ -17,6 +18,8 @@ __all__ = [
     "ContextMenuScreen",
     "DatePicker",
     "DatePickerScreen",
+    "HamburgerItem",
+    "HamburgerMenu",
     "HorizontalSplitter",
     "SearchHistoryDropdown",
     "SearchInputWithHistory",

@@ -21,6 +21,7 @@ from textual.widgets import Button, Input, Static
 
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.date_picker import DatePicker, DatePickerScreen
+from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
 from textual_widgets.search_history_dropdown import SearchInputWithHistory
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
 
@@ -401,6 +402,117 @@ class SplitterStory(Widget):
         try:
             self.query_one("#sp-result", Static).update(
                 f"Last resize: {target}.{axis} = {size} cells"
+            )
+        except Exception:
+            pass
+
+
+# ----------------------------------------------------------------------
+# Hamburger Menu
+# ----------------------------------------------------------------------
+
+
+_HAMBURGER_CODE = """\
+from textual_widgets import HamburgerMenu, HamburgerItem
+
+class MyApp(App):
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield HamburgerMenu(
+                items=[
+                    HamburgerItem('new', 'New mail', icon='+'),
+                    HamburgerItem.group('Accounts'),
+                    HamburgerItem('inbox', 'Inbox', icon='M'),
+                    HamburgerItem('sent', 'Sent', icon='S'),
+                ],
+                bottom_items=[
+                    HamburgerItem('settings', 'Settings', icon='*'),
+                ],
+            )
+            yield Container(id='main')
+
+    def on_hamburger_menu_item_selected(self, event):
+        self.notify(f'Selected: {event.item_id}')
+"""
+
+
+class HamburgerStory(Widget):
+    """HamburgerMenu in a 2-pane layout — sidebar + main content."""
+
+    DEFAULT_CSS = """
+    HamburgerStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    HamburgerStory #hb-demo {
+        layout: horizontal;
+        height: 18;
+        margin-bottom: 1;
+        border: round $primary;
+    }
+    HamburgerStory #hb-content {
+        width: 1fr;
+        padding: 1 2;
+        background: $surface-darken-1;
+        content-align: center middle;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("HamburgerMenu", classes="story-heading")
+            yield Static(
+                "Collapsible side menu in DevExpress style. Click the hamburger "
+                "icon at the top to expand or collapse — width animates smoothly. "
+                "Group headers visually separate sections; bottom items dock at "
+                "the bottom (e.g. for Settings). When collapsed, items show only "
+                "their icons; tooltips reveal labels on hover.",
+                classes="story-description",
+            )
+            with Container(id="hb-demo"):
+                yield HamburgerMenu(
+                    items=[
+                        HamburgerItem("new", "New mail", icon="+"),
+                        HamburgerItem.group("Accounts"),
+                        HamburgerItem("inbox", "Inbox", icon="M"),
+                        HamburgerItem("sent", "Sent", icon="S"),
+                        HamburgerItem("drafts", "Drafts", icon="D"),
+                        HamburgerItem.group("Folders"),
+                        HamburgerItem("archive", "Archive", icon="A"),
+                        HamburgerItem("trash", "Trash", icon="T"),
+                    ],
+                    bottom_items=[
+                        HamburgerItem("settings", "Settings", icon="*"),
+                    ],
+                    id="hb-menu",
+                )
+                yield Static("← Click an item", id="hb-content")
+            yield Static(
+                "Last selection: —",
+                id="hb-result", classes="story-result",
+            )
+            yield Static(_HAMBURGER_CODE, markup=False, classes="story-code")
+
+    def on_hamburger_menu_item_selected(
+        self, event: HamburgerMenu.ItemSelected,
+    ) -> None:
+        try:
+            self.query_one("#hb-result", Static).update(
+                f"Last selection: {event.item_id}"
+            )
+            self.query_one("#hb-content", Static).update(
+                f"You selected:\n[bold]{event.item_id}[/bold]"
+            )
+        except Exception:
+            pass
+
+    def on_hamburger_menu_toggled(
+        self, event: HamburgerMenu.Toggled,
+    ) -> None:
+        state = "expanded" if event.expanded else "collapsed"
+        try:
+            self.query_one("#hb-result", Static).update(
+                f"Menu {state}"
             )
         except Exception:
             pass

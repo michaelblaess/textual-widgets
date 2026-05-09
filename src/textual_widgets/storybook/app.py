@@ -24,6 +24,7 @@ from textual.widgets import ContentSwitcher, Footer, Header, Tree
 from textual_widgets.storybook.stories import (
     ContextMenuStory,
     DatePickerStory,
+    HamburgerStory,
     SearchStory,
     SplitterStory,
 )
@@ -36,6 +37,7 @@ _STORIES: list[tuple[str, str]] = [
     ("story-search", "Search"),
     ("story-contextmenu", "ContextMenu"),
     ("story-splitter", "Splitter"),
+    ("story-hamburger", "HamburgerMenu"),
 ]
 
 
@@ -129,6 +131,7 @@ class StorybookApp(App[None]):
                 yield SearchStory(id="story-search")
                 yield ContextMenuStory(id="story-contextmenu")
                 yield SplitterStory(id="story-splitter")
+                yield HamburgerStory(id="story-hamburger")
         yield Footer()
 
     def _build_sidebar(self) -> Tree[str]:

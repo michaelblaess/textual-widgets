@@ -176,6 +176,86 @@ The `shortcut` field is **display-only** — the consumer wires the keypress via
 
 Das `shortcut`-Feld ist **reine Anzeige** — den Tastendruck verdrahtet der Konsument selbst über Textual-`Bindings`.
 
+### HamburgerMenu
+
+Collapsible side menu in the DevExpress / Outlook style. Click the hamburger icon at the top to expand or collapse — width animates smoothly. When collapsed, items show only their icons; tooltips reveal their labels on hover. Group headers visually separate sections, and bottom items dock at the bottom (e.g. for Settings).
+
+Klappbares Seitenmenü im DevExpress/Outlook-Stil. Klick auf das Hamburger-Symbol oben blendet das Menü ein oder aus — die Breite wird sanft animiert. Im eingeklappten Zustand zeigen die Items nur Icons; Tooltips beim Hover blenden die Labels ein. Group-Header trennen Abschnitte visuell, Bottom-Items docken unten an (z.B. für Settings).
+
+| Widget | Description / Beschreibung |
+|--------|--------------------------|
+| `HamburgerItem` | Dataclass with `id`, `label`, optional `icon`. Factories `HamburgerItem.group(label)` and `HamburgerItem.separator()`. |
+| `HamburgerMenu` | Widget — list of items + optional bottom items. Posts `ItemSelected` and `Toggled` messages. |
+
+**Features:**
+- Animated collapse / expand (width animates with `styles.animate`)
+- Animiertes Ein- / Ausklappen
+- Click on hamburger icon **or** call `menu.toggle()` programmatically
+- Klick auf Hamburger-Symbol **oder** programmatisch via `menu.toggle()`
+- Group headers via `HamburgerItem.group("Accounts")` and separators via `HamburgerItem.separator()`
+- Group-Header über `HamburgerItem.group("Accounts")`, Trenner über `HamburgerItem.separator()`
+- Optional bottom-docked items (Settings, profile, etc.)
+- Optional Bottom-Items (Settings, Profil etc.)
+- `selected_id` reactive — programmatically highlight the active item
+- Reactive `selected_id` für programmatische Hervorhebung
+- Tooltips on collapsed items reveal labels on hover
+- Tooltips zeigen im eingeklappten Zustand die Labels
+- Optional JSON config via `HamburgerMenu.from_json("menu.json")`
+- Optional über JSON konfigurierbar (`HamburgerMenu.from_json(...)`)
+
+```python
+from textual.containers import Horizontal, Container
+from textual_widgets import HamburgerMenu, HamburgerItem
+
+class MyApp(App):
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield HamburgerMenu(
+                items=[
+                    HamburgerItem("new", "New mail", icon="+"),
+                    HamburgerItem.group("Accounts"),
+                    HamburgerItem("inbox", "Inbox", icon="📧"),
+                    HamburgerItem("sent", "Sent", icon="📤"),
+                    HamburgerItem.group("Folders"),
+                    HamburgerItem("drafts", "Drafts", icon="📝"),
+                ],
+                bottom_items=[
+                    HamburgerItem("settings", "Settings", icon="⚙"),
+                ],
+            )
+            yield Container(id="main")
+
+    def on_hamburger_menu_item_selected(
+        self, event: HamburgerMenu.ItemSelected,
+    ) -> None:
+        self.notify(f"Selected: {event.item_id}")
+```
+
+**JSON config / JSON-Konfiguration:**
+
+```json
+{
+  "items": [
+    {"id": "new", "label": "New mail", "icon": "+"},
+    {"group": "Accounts"},
+    {"id": "inbox", "label": "Inbox", "icon": "📧"},
+    {"separator": true},
+    {"id": "sent", "label": "Sent", "icon": "📤"}
+  ],
+  "bottom_items": [
+    {"id": "settings", "label": "Settings", "icon": "⚙"}
+  ]
+}
+```
+
+```python
+yield HamburgerMenu.from_json("menu.json")
+```
+
+The JSON only describes the structure — selection events still need to be wired up in Python (`on_hamburger_menu_item_selected`), since JSON cannot carry callbacks.
+
+Die JSON-Datei beschreibt nur die Struktur — die Selection-Events werden weiterhin in Python verdrahtet (`on_hamburger_menu_item_selected`), da JSON keine Callbacks transportieren kann.
+
 ### Splitter (VerticalSplitter / HorizontalSplitter)
 
 1-cell-wide / -tall dividers between two panels — drag with the mouse to resize the adjacent panel. Comparable to the splitters in IDEs / VS Code. A centered drag handle (`┊` vertical, `┄` horizontal) marks the grab zone visually.

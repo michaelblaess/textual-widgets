@@ -13,6 +13,7 @@ crashes on. All code Static widgets therefore use markup=False; the
 
 from __future__ import annotations
 
+import contextlib
 from datetime import date
 
 from textual.app import ComposeResult
@@ -105,10 +106,8 @@ class DatePickerStory(Widget):
             self._show_picked(date_str)
 
     def _show_picked(self, date_str: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             self.query_one("#dp-result", Static).update(f"Last picked: {date_str}")
-        except Exception:
-            pass
 
 
 # ----------------------------------------------------------------------
@@ -405,10 +404,8 @@ class SplitterStory(Widget):
         self._show_resize(event.target_id, event.size, axis="height")
 
     def _show_resize(self, target: str, size: int, axis: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             self.query_one("#sp-result", Static).update(f"Last resize: {target}.{axis} = {size} cells")
-        except Exception:
-            pass
 
 
 # ----------------------------------------------------------------------
@@ -516,7 +513,5 @@ class HamburgerStory(Widget):
         event: HamburgerMenu.Toggled,
     ) -> None:
         state = "expanded" if event.expanded else "collapsed"
-        try:
+        with contextlib.suppress(Exception):
             self.query_one("#hb-result", Static).update(f"Menu {state}")
-        except Exception:
-            pass

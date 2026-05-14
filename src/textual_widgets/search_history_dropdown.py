@@ -13,6 +13,8 @@ Zwei Komponenten mit unterschiedlichem Abstraktionsgrad:
 
 from __future__ import annotations
 
+import contextlib
+
 from rich.text import Text
 from textual import events
 from textual.app import ComposeResult
@@ -312,10 +314,8 @@ class SearchInputWithHistory(Vertical):
 
     @value.setter
     def value(self, val: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             self.query_one(f"#{self._input_id}", Input).value = val
-        except Exception:
-            pass
 
     def set_entries(self, entries: list[str]) -> None:
         """Aktualisiert die History-Eintraege im Dropdown."""
@@ -327,17 +327,13 @@ class SearchInputWithHistory(Vertical):
 
     def focus_input(self) -> None:
         """Fokussiert das Eingabefeld."""
-        try:
+        with contextlib.suppress(Exception):
             self.query_one(f"#{self._input_id}", Input).focus()
-        except Exception:
-            pass
 
     def hide_dropdown(self) -> None:
         """Versteckt das Dropdown explizit."""
-        try:
+        with contextlib.suppress(Exception):
             self.query_one(f"#{self._dropdown_id}", SearchHistoryDropdown).hide()
-        except Exception:
-            pass
 
     # --- Event-Handler -----------------------------------------------
 

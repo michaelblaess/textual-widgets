@@ -28,6 +28,7 @@ Usage:
             if action_id == "rename":
                 ...
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -66,7 +67,7 @@ class ContextMenuItem:
     is_separator: bool = False
 
     @classmethod
-    def separator(cls) -> "ContextMenuItem":
+    def separator(cls) -> ContextMenuItem:
         """Factory fuer eine Trenner-Zeile zwischen Item-Gruppen."""
         return cls(id="", label="", is_separator=True)
 
@@ -210,7 +211,8 @@ class ContextMenuScreen(ModalScreen[str | None]):
         """
         visible = [i for i in self._items if not i.is_separator]
         max_label = max(
-            (len(self._format_label(i)) for i in visible), default=0,
+            (len(self._format_label(i)) for i in visible),
+            default=0,
         )
         max_shortcut = max((len(i.shortcut) for i in visible), default=0)
 
@@ -228,7 +230,8 @@ class ContextMenuScreen(ModalScreen[str | None]):
         return (total_w, total_h)
 
     def on_option_list_option_selected(
-        self, event: OptionList.OptionSelected,
+        self,
+        event: OptionList.OptionSelected,
     ) -> None:
         """Wird ausgeloest, wenn der User ein Item per Maus oder Tastatur waehlt."""
         option_id = event.option.id

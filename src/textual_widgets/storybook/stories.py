@@ -10,6 +10,7 @@ type hints, ...) which Textual otherwise interprets as markup tags and
 crashes on. All code Static widgets therefore use markup=False; the
 "dim code" look comes from the .story-code CSS class.
 """
+
 from __future__ import annotations
 
 from datetime import date
@@ -24,7 +25,6 @@ from textual_widgets.date_picker import DatePicker, DatePickerScreen
 from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
 from textual_widgets.search_history_dropdown import SearchInputWithHistory
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
-
 
 # ----------------------------------------------------------------------
 # DatePicker
@@ -77,7 +77,8 @@ class DatePickerStory(Widget):
             )
             yield Static(
                 f"Last picked: {date.today().isoformat()}",
-                id="dp-result", classes="story-result",
+                id="dp-result",
+                classes="story-result",
             )
             with Horizontal(classes="demo-row"):
                 yield DatePicker(
@@ -180,7 +181,8 @@ class SearchStory(Widget):
             )
             yield Static(
                 "Last submit: —",
-                id="search-result", classes="story-result",
+                id="search-result",
+                classes="story-result",
             )
             yield Static(_SEARCH_CODE, markup=False, classes="story-code")
 
@@ -203,7 +205,8 @@ class SearchStory(Widget):
             pass
 
     def on_search_input_with_history_history_entry_delete_requested(
-        self, event: SearchInputWithHistory.HistoryEntryDeleteRequested,
+        self,
+        event: SearchInputWithHistory.HistoryEntryDeleteRequested,
     ) -> None:
         if event.entry in self._entries:
             self._entries.remove(event.entry)
@@ -262,14 +265,14 @@ class ContextMenuStory(Widget):
         with VerticalScroll():
             yield Static("ContextMenuScreen", classes="story-heading")
             yield Static(
-                "Reusable context menu. Right-click into the area below to open "
-                "the menu at the cursor position.",
+                "Reusable context menu. Right-click into the area below to open the menu at the cursor position.",
                 classes="story-description",
             )
             yield Static("RIGHT-CLICK HERE", id="cm-click-area")
             yield Static(
                 "Last action: —",
-                id="cm-result", classes="story-result",
+                id="cm-result",
+                classes="story-result",
             )
             yield Static(_CONTEXTMENU_CODE, markup=False, classes="story-code")
 
@@ -384,25 +387,26 @@ class SplitterStory(Widget):
                     yield Static("Bottom panel\n(height: 1fr)", id="sp-bottom")
             yield Static(
                 "Last resize: —",
-                id="sp-result", classes="story-result",
+                id="sp-result",
+                classes="story-result",
             )
             yield Static(_SPLITTER_CODE, markup=False, classes="story-code")
 
     def on_vertical_splitter_resized(
-        self, event: VerticalSplitter.Resized,
+        self,
+        event: VerticalSplitter.Resized,
     ) -> None:
         self._show_resize(event.target_id, event.size, axis="width")
 
     def on_horizontal_splitter_resized(
-        self, event: HorizontalSplitter.Resized,
+        self,
+        event: HorizontalSplitter.Resized,
     ) -> None:
         self._show_resize(event.target_id, event.size, axis="height")
 
     def _show_resize(self, target: str, size: int, axis: str) -> None:
         try:
-            self.query_one("#sp-result", Static).update(
-                f"Last resize: {target}.{axis} = {size} cells"
-            )
+            self.query_one("#sp-result", Static).update(f"Last resize: {target}.{axis} = {size} cells")
         except Exception:
             pass
 
@@ -492,30 +496,27 @@ class HamburgerStory(Widget):
                 yield Static("← Click an item", id="hb-content")
             yield Static(
                 "Last selection: —",
-                id="hb-result", classes="story-result",
+                id="hb-result",
+                classes="story-result",
             )
             yield Static(_HAMBURGER_CODE, markup=False, classes="story-code")
 
     def on_hamburger_menu_item_selected(
-        self, event: HamburgerMenu.ItemSelected,
+        self,
+        event: HamburgerMenu.ItemSelected,
     ) -> None:
         try:
-            self.query_one("#hb-result", Static).update(
-                f"Last selection: {event.item_id}"
-            )
-            self.query_one("#hb-content", Static).update(
-                f"You selected:\n[bold]{event.item_id}[/bold]"
-            )
+            self.query_one("#hb-result", Static).update(f"Last selection: {event.item_id}")
+            self.query_one("#hb-content", Static).update(f"You selected:\n[bold]{event.item_id}[/bold]")
         except Exception:
             pass
 
     def on_hamburger_menu_toggled(
-        self, event: HamburgerMenu.Toggled,
+        self,
+        event: HamburgerMenu.Toggled,
     ) -> None:
         state = "expanded" if event.expanded else "collapsed"
         try:
-            self.query_one("#hb-result", Static).update(
-                f"Menu {state}"
-            )
+            self.query_one("#hb-result", Static).update(f"Menu {state}")
         except Exception:
             pass

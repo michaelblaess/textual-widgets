@@ -1,4 +1,5 @@
 """Tests for HamburgerItem and HamburgerMenu construction + JSON loading."""
+
 from __future__ import annotations
 
 import json

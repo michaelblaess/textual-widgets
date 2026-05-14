@@ -30,13 +30,13 @@ Usage:
         ) -> None:
             self._settings.set_panel_width(event.target_id, event.size)
 """
+
 from __future__ import annotations
 
 from textual import events
 from textual.app import RenderResult
 from textual.message import Message
 from textual.widget import Widget
-
 
 # Drag-Handle-Glyphen — Box-Drawing "light quadruple dash" Zeichen, sehen wie
 # gestrichelte Linien aus und wirken intuitiv als Greifgriff.
@@ -167,10 +167,7 @@ class VerticalSplitter(_SplitterBase):
         h = max(1, self.size.height)
         handle_n = min(_HANDLE_SIZE, h)
         pad_top = (h - handle_n) // 2
-        return "\n".join(
-            _VERTICAL_HANDLE_CHAR if pad_top <= i < pad_top + handle_n else " "
-            for i in range(h)
-        )
+        return "\n".join(_VERTICAL_HANDLE_CHAR if pad_top <= i < pad_top + handle_n else " " for i in range(h))
 
     def _current_size(self, target: Widget) -> int:
         return int(target.outer_size.width)

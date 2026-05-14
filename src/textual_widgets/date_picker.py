@@ -20,8 +20,18 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Static
 
 _MONTH_NAMES = [
-    "Januar", "Februar", "Maerz", "April", "Mai", "Juni",
-    "Juli", "August", "September", "Oktober", "November", "Dezember",
+    "Januar",
+    "Februar",
+    "Maerz",
+    "April",
+    "Mai",
+    "Juni",
+    "Juli",
+    "August",
+    "September",
+    "Oktober",
+    "November",
+    "Dezember",
 ]
 
 
@@ -110,11 +120,10 @@ class CalendarGrid(Static):
             text.append(f" {wd} ", style=style)
         text.append("\n")
 
-        is_today_month = (self._year == self._today.year
-                         and self._month == self._today.month)
-        show_selected = (self._selected_day > 0
-                         and self._year == self._selected_year
-                         and self._month == self._selected_month)
+        is_today_month = self._year == self._today.year and self._month == self._today.month
+        show_selected = (
+            self._selected_day > 0 and self._year == self._selected_year and self._month == self._selected_month
+        )
         for week in self._weeks:
             for i, day in enumerate(week):
                 if day == 0:
@@ -235,7 +244,8 @@ class DatePicker(Vertical):
             yield Button(">", id="dp-next-month", classes="dp-nav-btn")
             yield Button(">>", id="dp-next-year", classes="dp-nav-btn")
         yield CalendarGrid(
-            self._year, self._month,
+            self._year,
+            self._month,
             selected_day=self._selected_day,
             id="dp-cal-grid",
         )
@@ -345,7 +355,8 @@ class DatePickerScreen(ModalScreen[str | None]):
         with Vertical():
             yield Static("Select date", id="dps-title")
             yield DatePicker(
-                self._year, self._month,
+                self._year,
+                self._month,
                 selected_day=self._selected_day,
                 id="dps-picker",
             )

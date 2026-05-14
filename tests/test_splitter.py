@@ -1,4 +1,5 @@
 """Tests fuer VerticalSplitter und HorizontalSplitter."""
+
 from __future__ import annotations
 
 from textual_widgets import HorizontalSplitter, VerticalSplitter

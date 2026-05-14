@@ -16,6 +16,11 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    "pytest-cov>=4.0",
+    "pytest-xdist>=3.5",
+    "mypy>=1.8",
+    "poethepoet>=0.29",
+    "ruff>=0.3",
 ]
 storybook = [
     "textual-themes @ git+https://github.com/michaelblaess/textual-themes.git",
@@ -23,6 +28,16 @@ storybook = [
 
 [project.scripts]
 textual-widgets-storybook = "textual_widgets.storybook.__main__:main"
+
+[tool.poe.tasks]
+storybook = { cmd = "python -m textual_widgets.storybook", help = "Startet die Storybook-Demo" }
+test = { cmd = "pytest", help = "Tests sequentiell (schnell bei Unit-Tests)" }
+test-parallel = { cmd = "pytest -n auto", help = "Tests parallel (fuer langsame Test-Suiten)" }
+cov = { cmd = "pytest --cov=textual_widgets --cov-report=term-missing", help = "Tests + Coverage" }
+typecheck = { cmd = "mypy src", help = "mypy strict ueber src/" }
+lint = { cmd = "ruff check .", help = "Ruff Linting" }
+fmt = { cmd = "ruff format .", help = "Ruff Formatting" }
+fix = { cmd = "ruff check --fix .", help = "Ruff Auto-Fix" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -37,3 +52,11 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "ASYNC"]
+ignore = ["E501"]

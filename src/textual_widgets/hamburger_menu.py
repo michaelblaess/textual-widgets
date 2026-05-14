@@ -55,12 +55,12 @@ JSON config (optional):
     #   ]
     # }
 """
+
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Vertical, VerticalScroll
@@ -92,12 +92,12 @@ class HamburgerItem:
     is_separator: bool = False
 
     @classmethod
-    def group(cls, label: str) -> "HamburgerItem":
+    def group(cls, label: str) -> HamburgerItem:
         """Factory: create a group header (visual section title)."""
         return cls(id="", label=label, is_group_header=True)
 
     @classmethod
-    def separator(cls) -> "HamburgerItem":
+    def separator(cls) -> HamburgerItem:
         """Factory: create a separator line between items."""
         return cls(id="", label="", is_separator=True)
 
@@ -202,7 +202,10 @@ class _HamburgerEntry(Static, can_focus=True):
 
     @staticmethod
     def _compute_content(
-        item: HamburgerItem, expanded: bool, is_toggle: bool, toggle_icon: str,
+        item: HamburgerItem,
+        expanded: bool,
+        is_toggle: bool,
+        toggle_icon: str,
     ) -> str:
         """Map the entry+state to the string we render."""
         if is_toggle:
@@ -218,7 +221,10 @@ class _HamburgerEntry(Static, can_focus=True):
         """Re-render content for a new expanded state (called on toggle)."""
         self.update(
             self._compute_content(
-                self._item, expanded, self._is_toggle, self._toggle_icon,
+                self._item,
+                expanded,
+                self._is_toggle,
+                self._toggle_icon,
             )
         )
 
@@ -331,7 +337,8 @@ class HamburgerMenu(Widget):
         with VerticalScroll(id="hb-items"):
             for idx, item in enumerate(self._items):
                 yield _HamburgerEntry(
-                    item, expanded=self._initial_expanded,
+                    item,
+                    expanded=self._initial_expanded,
                     show_tooltip=self._show_tooltips,
                     id=f"hb-top-{idx}",
                 )
@@ -339,7 +346,8 @@ class HamburgerMenu(Widget):
             with Vertical(id="hb-bottom"):
                 for idx, item in enumerate(self._bottom_items):
                     yield _HamburgerEntry(
-                        item, expanded=self._initial_expanded,
+                        item,
+                        expanded=self._initial_expanded,
                         show_tooltip=self._show_tooltips,
                         id=f"hb-bot-{idx}",
                     )
@@ -405,7 +413,8 @@ class HamburgerMenu(Widget):
     # --- Internal message handling -------------------------------------
 
     def on__hamburger_entry_activated(
-        self, event: _HamburgerEntry.Activated,
+        self,
+        event: _HamburgerEntry.Activated,
     ) -> None:
         """Translate the internal Activated message into the public API."""
         event.stop()
@@ -420,8 +429,10 @@ class HamburgerMenu(Widget):
 
     @classmethod
     def from_json(
-        cls, path: str | Path, **kwargs: object,
-    ) -> "HamburgerMenu":
+        cls,
+        path: str | Path,
+        **kwargs: object,
+    ) -> HamburgerMenu:
         """Construct a menu from a JSON config file.
 
         Expected structure::

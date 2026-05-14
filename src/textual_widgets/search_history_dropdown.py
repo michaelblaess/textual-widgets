@@ -22,7 +22,6 @@ from textual.message import Message
 from textual.widgets import Input, OptionList, Static
 from textual.widgets.option_list import Option
 
-
 # ------------------------------------------------------------------
 # SearchHistoryDropdown — OptionList mit Substring-Filter
 # ------------------------------------------------------------------
@@ -142,9 +141,7 @@ class SearchHistoryDropdown(OptionList):
         """Berechnet die sichtbaren Eintraege und befuellt die OptionList."""
         q = self._current_query.lower().strip()
         if q:
-            self._visible_entries = [
-                e for e in self._all_entries if q in e.lower()
-            ][: self._max_visible]
+            self._visible_entries = [e for e in self._all_entries if q in e.lower()][: self._max_visible]
         else:
             self._visible_entries = self._all_entries[: self._max_visible]
 
@@ -168,7 +165,8 @@ class SearchHistoryDropdown(OptionList):
             self.remove_class("-visible")
 
     def on_option_list_option_selected(
-        self, event: OptionList.OptionSelected,
+        self,
+        event: OptionList.OptionSelected,
     ) -> None:
         """Eintrag wurde via Enter oder Klick ausgewaehlt."""
         event.stop()
@@ -386,7 +384,8 @@ class SearchInputWithHistory(Vertical):
             pass
 
     def on_search_history_dropdown_entry_selected(
-        self, event: SearchHistoryDropdown.EntrySelected,
+        self,
+        event: SearchHistoryDropdown.EntrySelected,
     ) -> None:
         """Eintrag uebernehmen → Input befuellen, Dropdown schliessen, submitten."""
         event.stop()
@@ -405,7 +404,8 @@ class SearchInputWithHistory(Vertical):
         self.post_message(self.HistoryEntrySelected(event.entry))
 
     def on_search_history_dropdown_entry_delete_requested(
-        self, event: SearchHistoryDropdown.EntryDeleteRequested,
+        self,
+        event: SearchHistoryDropdown.EntryDeleteRequested,
     ) -> None:
         """Loesch-Anfrage an Host weiterleiten — Persistenz dort."""
         event.stop()

@@ -11,6 +11,7 @@ Theme-Integration: Wenn das optionale `textual-themes`-Paket installiert
 ist, werden alle Retro-Themes registriert — Theme-Wechsel ueber Ctrl+P
 (Textual Command-Palette) oder per Theme-Picker.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -28,7 +29,6 @@ from textual_widgets.storybook.stories import (
     SearchStory,
     SplitterStory,
 )
-
 
 # Reihenfolge der Stories in der Sidebar = Reihenfolge fuer n/p-Cycle
 _STORIES: list[tuple[str, str]] = [
@@ -117,6 +117,7 @@ class StorybookApp(App[None]):
         # Optional: textual-themes registrieren (mit `[storybook]`-Extra dabei)
         try:
             from textual_themes import register_all
+
             register_all(self)
         except ImportError:
             pass

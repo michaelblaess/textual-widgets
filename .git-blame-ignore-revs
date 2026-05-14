@@ -1,0 +1,5 @@
+# Commits ignored by git blame (style-only changes).
+# Activate locally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub respects this file automatically.
+
+709aa781a594a44eee8edaa54d55646fa72bbe26  # chore: ruff format + auto-fix

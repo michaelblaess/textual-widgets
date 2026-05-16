@@ -29,11 +29,10 @@ $python = if (Test-Path $venvPython) { $venvPython } else { "python" }
 
 # venv mit dem Lockfile abgleichen, damit Nuitka keine veralteten
 # (Git-)Dependencies einkompiliert. --inexact laesst Extra-Pakete wie das
-# ad-hoc installierte nuitka unangetastet. Das storybook-Extra muss dabei sein,
-# sonst fehlt die textual-themes-Dependency der Demo-App.
+# ad-hoc installierte nuitka unangetastet.
 if (Get-Command uv -ErrorAction SilentlyContinue) {
     Write-Host "Syncing venv to lockfile (uv sync --inexact)..." -ForegroundColor Cyan
-    & uv sync --inexact --extra storybook --project $root
+    & uv sync --inexact --project $root
     if ($LASTEXITCODE -ne 0) { throw "uv sync fehlgeschlagen" }
 } else {
     Write-Host "uv nicht gefunden - venv-Sync uebersprungen" -ForegroundColor Yellow

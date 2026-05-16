@@ -39,11 +39,10 @@ done
 
 # venv mit dem Lockfile abgleichen, damit Nuitka keine veralteten
 # (Git-)Dependencies einkompiliert. --inexact laesst Extra-Pakete wie das
-# ad-hoc installierte nuitka unangetastet. Das storybook-Extra muss dabei sein,
-# sonst fehlt die textual-themes-Dependency der Demo-App.
+# ad-hoc installierte nuitka unangetastet.
 if command -v uv >/dev/null 2>&1; then
     echo "Syncing venv to lockfile (uv sync --inexact)..."
-    uv sync --inexact --extra storybook --project "$root"
+    uv sync --inexact --project "$root"
 else
     echo "uv nicht gefunden - venv-Sync uebersprungen" >&2
 fi

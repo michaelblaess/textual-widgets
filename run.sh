@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
+# run.sh - starts the textual-widgets storybook demo from source.
 set -euo pipefail
-
 cd "$(dirname "$0")"
 
-if [[ -x ".venv/bin/python" ]]; then
-    .venv/bin/python -m textual_widgets.storybook "$@"
-else
-    python3 -m textual_widgets.storybook "$@"
+if [ ! -d ".venv" ]; then
+    echo "Please run ./bootstrap.sh first." >&2
+    exit 1
 fi
+
+.venv/bin/python -m textual_widgets.storybook "$@"

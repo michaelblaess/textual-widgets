@@ -1,6 +1,6 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
@@ -11,6 +11,7 @@ from textual_widgets.search_history_dropdown import (
     SearchInputWithHistory,
 )
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
+from textual_widgets.terminal_title import reset_terminal_title, set_terminal_title
 
 __all__ = [
     "CalendarGrid",
@@ -24,4 +25,6 @@ __all__ = [
     "SearchHistoryDropdown",
     "SearchInputWithHistory",
     "VerticalSplitter",
+    "reset_terminal_title",
+    "set_terminal_title",
 ]

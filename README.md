@@ -269,6 +269,35 @@ class MyApp(App):
 
 **CSS requirement:** the target panel needs a size the splitter can override (a percent or cells default both work; `1fr` is too flexible).
 
+## Helpers
+
+### Terminal Title (set_terminal_title / reset_terminal_title)
+
+Textual does not set the OS terminal title itself — `App.TITLE` only feeds the in-app `Header` widget, so the terminal tab keeps showing the shell/profile name. These helpers write the OSC escape sequence directly so the tab text reflects your app.
+
+| Function | Description |
+|----------|-------------|
+| `set_terminal_title(title)` | Sets the terminal window/tab title |
+| `reset_terminal_title()` | Clears the title (the shell prompt resets it anyway) |
+
+**Notes:**
+- Writes through `sys.__stdout__` (Windows: `WriteConsoleW`), which bypasses the active code page — raw byte writes would turn UTF-8 into mojibake on a cp1252 console
+- Works on Windows Terminal, mintty, xterm, GNOME Terminal, Konsole, iTerm2, Terminal.app, Alacritty, kitty, WezTerm
+- For a pseudo-"icon" prepend a monochrome text symbol (e.g. `♬`) — it inherits the tab's text colour. Colour emoji can't be recoloured. The real tab icon comes from the terminal profile and cannot be changed by an app.
+
+```python
+from textual_widgets import reset_terminal_title, set_terminal_title
+
+def main() -> None:
+    set_terminal_title("♬ my-app v1.0.0")
+    try:
+        MyApp().run()
+    finally:
+        reset_terminal_title()
+```
+
+To update the title at runtime (e.g. per track), call `set_terminal_title()` from a `watch_` handler — OSC title sequences don't draw anything and won't disturb Textual's rendering.
+
 ## Installation
 
 ```bash

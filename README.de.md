@@ -269,6 +269,35 @@ class MyApp(App):
 
 **CSS-Voraussetzung:** Das Target-Panel braucht eine Größe, die der Splitter überschreiben kann (Prozent- oder Zellen-Default sind beide in Ordnung, `1fr` wäre zu flexibel).
 
+## Helfer
+
+### Terminal-Titel (set_terminal_title / reset_terminal_title)
+
+Textual setzt den OS-Terminal-Titel nicht selbst — `App.TITLE` füttert nur das interne `Header`-Widget, der Terminal-Tab zeigt also weiter den Shell-/Profilnamen. Diese Helfer schreiben die OSC-Escape-Sequenz direkt, damit der Tab-Text die App widerspiegelt.
+
+| Funktion | Beschreibung |
+|----------|--------------|
+| `set_terminal_title(title)` | Setzt den Terminal-Fenster-/Tab-Titel |
+| `reset_terminal_title()` | Löscht den Titel (der Shell-Prompt setzt ihn ohnehin neu) |
+
+**Hinweise:**
+- Schreibt über `sys.__stdout__` (Windows: `WriteConsoleW`), das die aktive Code-Page umgeht — rohe Byte-Writes würden UTF-8 auf einer cp1252-Konsole zu Mojibake machen
+- Funktioniert mit Windows Terminal, mintty, xterm, GNOME Terminal, Konsole, iTerm2, Terminal.app, Alacritty, kitty, WezTerm
+- Für ein Pseudo-"Icon" ein monochromes Text-Symbol voranstellen (z.B. `♬`) — es übernimmt die Tab-Textfarbe. Color-Emoji lassen sich nicht umfärben. Das echte Tab-Icon kommt aus dem Terminal-Profil und kann von einer App nicht geändert werden.
+
+```python
+from textual_widgets import reset_terminal_title, set_terminal_title
+
+def main() -> None:
+    set_terminal_title("♬ my-app v1.0.0")
+    try:
+        MyApp().run()
+    finally:
+        reset_terminal_title()
+```
+
+Für Laufzeit-Updates (z.B. pro Track) `set_terminal_title()` aus einem `watch_`-Handler aufrufen — OSC-Titel-Sequenzen zeichnen nichts und stören das Textual-Rendering nicht.
+
 ## Installation
 
 ```bash

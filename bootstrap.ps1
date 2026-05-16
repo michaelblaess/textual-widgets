@@ -4,10 +4,8 @@
     Sets up the textual-widgets development environment.
 
 .DESCRIPTION
-    Creates the .venv via uv, installs runtime + dev dependencies, the
-    storybook extra (the textual-themes git dependency the demo app needs)
-    and the Nuitka build tool (for compile-win64.ps1). Run once after
-    cloning the repo.
+    Creates the .venv via uv, installs runtime + dev dependencies and the
+    Nuitka build tool (for compile-win64.ps1). Run once after cloning the repo.
 #>
 
 $ErrorActionPreference = "Stop"
@@ -16,7 +14,7 @@ Set-Location $PSScriptRoot
 Write-Host "=== textual-widgets - dev environment ===" -ForegroundColor Cyan
 
 Write-Host "[1/2] venv + dependencies (uv sync)..."
-uv sync --extra dev --extra storybook
+uv sync --extra dev
 if ($LASTEXITCODE -ne 0) { throw "uv sync fehlgeschlagen" }
 
 Write-Host "[2/2] Nuitka build tool..."

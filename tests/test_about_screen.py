@@ -71,14 +71,14 @@ class TestAboutScreen:
         assert screen._quote in load_quotes("de")
 
     def test_default_footer_localized(self) -> None:
-        assert self._screen(lang="de")._footer == "ESC = Schliessen"
-        assert self._screen(lang="en")._footer == "ESC = Close"
+        assert self._screen(lang="de")._footer == "Schließen (ESC)"
+        assert self._screen(lang="en")._footer == "Close (ESC)"
 
     def test_custom_footer(self) -> None:
         assert self._screen(footer="Bye")._footer == "Bye"
 
     def test_unknown_lang_falls_back_to_english_footer(self) -> None:
-        assert self._screen(lang="xx")._footer == "ESC = Close"
+        assert self._screen(lang="xx")._footer == "Close (ESC)"
 
     def test_no_url_by_default(self) -> None:
         assert self._screen()._url is None

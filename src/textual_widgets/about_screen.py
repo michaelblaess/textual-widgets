@@ -40,15 +40,15 @@ from importlib import resources
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import VerticalScroll
+from textual.containers import Center, VerticalScroll
 from textual.events import Click
 from textual.screen import ModalScreen
-from textual.widgets import Rule, Static
+from textual.widgets import Button, Rule, Static
 
-# Default-Footer pro Sprache. Andere Sprachen fallen auf Englisch zurueck.
+# Default-Beschriftung des Schliessen-Buttons pro Sprache.
 _FOOTER_TEXT = {
-    "de": "ESC = Schliessen",
-    "en": "ESC = Close",
+    "de": "Schließen (ESC)",
+    "en": "Close (ESC)",
 }
 
 # Breiten-Schranken des Dialogs (Inhaltsbreite + Border + Padding).
@@ -156,8 +156,7 @@ class AboutScreen(ModalScreen[None]):
 
     AboutScreen #about-footer {
         width: 1fr;
-        content-align: center middle;
-        color: $text-muted;
+        height: auto;
         margin-top: 1;
     }
     """
@@ -237,7 +236,8 @@ class AboutScreen(ModalScreen[None]):
                 yield Static(self._build_quote(self._quote), id="about-quote")
             if self._url:
                 yield Static(self._build_url(self._url), id="about-url")
-            yield Static(self._footer, id="about-footer")
+            with Center(id="about-footer"):
+                yield Button(self._footer, variant="primary", id="about-close")
 
     def on_mount(self) -> None:
         """Setzt die Dialogbreite anhand der laengsten Inhaltszeile.
@@ -292,6 +292,10 @@ class AboutScreen(ModalScreen[None]):
         if widget is self:
             self.dismiss(None)
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Schliesst den Dialog beim Klick auf den Schliessen-Button."""
+        self.dismiss(None)
+
     def action_close(self) -> None:
-        """Schliesst den Dialog."""
+        """Schliesst den Dialog (ESC)."""
         self.dismiss(None)

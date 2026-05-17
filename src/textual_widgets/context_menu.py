@@ -102,6 +102,7 @@ class ContextMenuScreen(ModalScreen[str | None]):
         background: transparent;
         border: none;
         padding: 0;
+        width: 1fr;
         height: auto;
     }
     """
@@ -165,13 +166,18 @@ class ContextMenuScreen(ModalScreen[str | None]):
         return item.label
 
     def on_mount(self) -> None:
-        """Positioniert das Menue am Klick-Punkt (mit Off-Screen-Schutz).
+        """Setzt die Breite und positioniert das Menue (mit Off-Screen-Schutz).
 
         Eine Phase, deterministisch: aus den Items eine bewusst leicht
         ueberschaetzte Groesse berechnen und damit clampen. Lieber das
         Menue 1-2 Zellen zu hoch ausgeben als unten abgeschnitten —
         und kein Reposition-Sprung in einem zweiten Frame.
         """
+        # Breite dynamisch aus dem laengsten Eintrag setzen. Ohne das blaeht
+        # die OptionList (width: 1fr) den auto-Container bis max-width auf.
+        menu_w, _ = self._estimate_size()
+        self.query_one(Vertical).styles.width = menu_w
+
         if self._at is not None:
             self._apply_position()
         else:

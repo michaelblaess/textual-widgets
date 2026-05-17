@@ -80,6 +80,18 @@ class TestAboutScreen:
     def test_unknown_lang_falls_back_to_english_footer(self) -> None:
         assert self._screen(lang="xx")._footer == "ESC = Close"
 
+    def test_no_url_by_default(self) -> None:
+        assert self._screen()._url is None
+
+    def test_url_stored(self) -> None:
+        url = "https://github.com/michaelblaess/my-tool"
+        assert self._screen(url=url)._url == url
+
+    def test_url_widens_dialog(self) -> None:
+        short = "https://x.io"
+        long = "https://github.com/michaelblaess/some-very-long-repo-name-here"
+        assert self._screen(url=long)._dialog_width() >= self._screen(url=short)._dialog_width()
+
     def test_dialog_width_within_bounds(self) -> None:
         narrow = self._screen(description="hi", quote=Quote("x", "y"))
         assert 44 <= narrow._dialog_width() <= 92

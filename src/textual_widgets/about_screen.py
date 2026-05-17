@@ -10,6 +10,7 @@ Public API:
         Beschreibung
         --- (Trenner, passt sich automatisch der Dialogbreite an)
         Zitat
+        URL (optional, anklickbar)
         ESC = Close
 
 Usage:
@@ -146,6 +147,13 @@ class AboutScreen(ModalScreen[None]):
         width: 1fr;
     }
 
+    AboutScreen #about-url {
+        width: 1fr;
+        content-align: center middle;
+        color: $accent;
+        margin-top: 1;
+    }
+
     AboutScreen #about-footer {
         width: 1fr;
         content-align: center middle;
@@ -169,6 +177,7 @@ class AboutScreen(ModalScreen[None]):
         lang: str = "en",
         quote: Quote | None = None,
         quotes: list[Quote] | None = None,
+        url: str | None = None,
         footer: str | None = None,
     ) -> None:
         """Erstellt den About-Dialog.
@@ -193,6 +202,9 @@ class AboutScreen(ModalScreen[None]):
             quotes:
                 Optionale eigene Zitatliste. Wird statt des mitgelieferten
                 Pools verwendet (zufaellige Auswahl).
+            url:
+                Optionale Projekt-/Repo-URL. Wird unter dem Zitat als
+                anklickbarer Link angezeigt (CTRL+Klick oeffnet im Browser).
             footer:
                 Optionaler Footer-Text. Default ist das sprachabhaengige
                 "ESC = Schliessen" / "ESC = Close".
@@ -203,6 +215,7 @@ class AboutScreen(ModalScreen[None]):
         self._author = author
         self._release = release
         self._description = description.rstrip("\n")
+        self._url = url
         self._lang = lang if lang in _FOOTER_TEXT else "en"
         self._footer = footer if footer is not None else _FOOTER_TEXT[self._lang]
 
@@ -222,6 +235,8 @@ class AboutScreen(ModalScreen[None]):
             if self._quote is not None:
                 yield Rule(line_style="solid")
                 yield Static(self._build_quote(self._quote), id="about-quote")
+            if self._url:
+                yield Static(self._build_url(self._url), id="about-url")
             yield Static(self._footer, id="about-footer")
 
     def on_mount(self) -> None:
@@ -251,6 +266,11 @@ class AboutScreen(ModalScreen[None]):
         text.append(f"- {quote.author}", style="bold")
         return text
 
+    @staticmethod
+    def _build_url(url: str) -> Text:
+        """Baut die URL als anklickbaren Link (OSC-8, CTRL+Klick)."""
+        return Text(url, style=f"underline link {url}")
+
     def _dialog_width(self) -> int:
         """Berechnet die Dialogbreite aus der laengsten Inhaltszeile."""
         lines: list[str] = [self._app_name, self._build_meta().plain]
@@ -258,6 +278,8 @@ class AboutScreen(ModalScreen[None]):
         if self._quote is not None:
             lines += self._quote.text.split("\n")
             lines.append(f"- {self._quote.author}")
+        if self._url:
+            lines.append(self._url)
         lines.append(self._footer)
 
         content = max((len(line) for line in lines), default=0)

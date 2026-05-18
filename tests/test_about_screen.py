@@ -92,6 +92,20 @@ class TestAboutScreen:
         long = "https://github.com/michaelblaess/some-very-long-repo-name-here"
         assert self._screen(url=long)._dialog_width() >= self._screen(url=short)._dialog_width()
 
+    def test_no_license_by_default(self) -> None:
+        assert self._screen()._license is None
+
+    def test_license_stored(self) -> None:
+        assert self._screen(license="Apache 2.0")._license == "Apache 2.0"
+
+    def test_license_in_meta_line(self) -> None:
+        meta = self._screen(license="Apache 2.0")._build_meta().plain
+        assert "Apache 2.0" in meta
+
+    def test_no_license_absent_from_meta(self) -> None:
+        meta = self._screen()._build_meta().plain
+        assert "Apache" not in meta
+
     def test_dialog_width_within_bounds(self) -> None:
         narrow = self._screen(description="hi", quote=Quote("x", "y"))
         assert 44 <= narrow._dialog_width() <= 92

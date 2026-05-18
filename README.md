@@ -447,7 +447,7 @@ Or in `pyproject.toml`:
 
 ```toml
 dependencies = [
-    "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git@v0.14.2",
+    "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git@v0.14.3",
 ]
 ```
 

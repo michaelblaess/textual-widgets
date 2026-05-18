@@ -129,6 +129,7 @@ class AboutScreen(ModalScreen[None]):
 
     AboutScreen #about-meta {
         width: 1fr;
+        text-align: center;
         margin-bottom: 1;
     }
 

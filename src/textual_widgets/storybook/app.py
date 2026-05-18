@@ -22,11 +22,17 @@ from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.widgets import ContentSwitcher, Footer, Header, Tree
 
+from textual_widgets.crash_guard import CrashGuard
+from textual_widgets.log_panel import LogRouter
 from textual_widgets.storybook.stories import (
+    AboutStory,
     ContextMenuStory,
+    CrashGuardStory,
     DatePickerStory,
     HamburgerStory,
+    LogPanelStory,
     SearchStory,
+    SettingsStory,
     SplitterStory,
 )
 
@@ -38,11 +44,20 @@ _STORIES: list[tuple[str, str]] = [
     ("story-contextmenu", "ContextMenu"),
     ("story-splitter", "Splitter"),
     ("story-hamburger", "HamburgerMenu"),
+    ("story-about", "AboutScreen"),
+    ("story-settings", "BaseSettingsScreen"),
+    ("story-logpanel", "LogPanel"),
+    ("story-crashguard", "CrashGuard"),
 ]
 
 
-class StorybookApp(App[None]):
-    """Showcase-App fuer alle Widgets der Library."""
+class StorybookApp(CrashGuard, LogRouter, App[None]):
+    """Showcase-App fuer alle Widgets der Library.
+
+    Erbt `CrashGuard` und `LogRouter`: damit funktionieren die CrashGuard-
+    und LogPanel-Stories als echte End-to-End-Demos — eine geworfene
+    Exception landet im `ErrorScreen`, ein `LogMessage` im `LogPanel`.
+    """
 
     TITLE = "textual-widgets — Storybook"
 
@@ -114,6 +129,7 @@ class StorybookApp(App[None]):
 
     def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
+        self.crash_guard_lang = "en"
         # Optional: textual-themes registrieren (mit `[storybook]`-Extra dabei)
         try:
             from textual_themes import register_all
@@ -133,6 +149,10 @@ class StorybookApp(App[None]):
                 yield ContextMenuStory(id="story-contextmenu")
                 yield SplitterStory(id="story-splitter")
                 yield HamburgerStory(id="story-hamburger")
+                yield AboutStory(id="story-about")
+                yield SettingsStory(id="story-settings")
+                yield LogPanelStory(id="story-logpanel")
+                yield CrashGuardStory(id="story-crashguard")
         yield Footer()
 
     def _build_sidebar(self) -> Tree[str]:

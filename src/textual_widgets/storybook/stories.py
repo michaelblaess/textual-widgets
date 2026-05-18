@@ -14,17 +14,23 @@ crashes on. All code Static widgets therefore use markup=False; the
 from __future__ import annotations
 
 import contextlib
+import traceback
 from datetime import date
 
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.widget import Widget
-from textual.widgets import Button, Input, Static
+from textual.widgets import Button, Checkbox, Input, Label, Select, Static, TabPane
 
+from textual_widgets import __author__, __version__
+from textual_widgets.about_screen import AboutScreen
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
+from textual_widgets.crash_guard import ErrorScreen
 from textual_widgets.date_picker import DatePicker, DatePickerScreen
 from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
+from textual_widgets.log_panel import LogMessage, LogPanel
 from textual_widgets.search_history_dropdown import SearchInputWithHistory
+from textual_widgets.settings_screen import BaseSettingsScreen
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
 
 # ----------------------------------------------------------------------
@@ -515,3 +521,343 @@ class HamburgerStory(Widget):
         state = "expanded" if event.expanded else "collapsed"
         with contextlib.suppress(Exception):
             self.query_one("#hb-result", Static).update(f"Menu {state}")
+
+
+# ----------------------------------------------------------------------
+# AboutScreen
+# ----------------------------------------------------------------------
+
+
+_ABOUT_CODE = """\
+from textual_widgets import AboutScreen
+
+from . import __author__, __version__, __year__
+
+def action_show_about(self) -> None:
+    self.push_screen(AboutScreen(
+        app_name='my-tool',
+        version=__version__,        # without leading 'v'
+        author=__author__,
+        release='2026',
+        description='One-line summary.\\nSecond line.',
+        lang='en',
+        license='Apache 2.0',
+        url='https://github.com/me/my-tool',
+    ))
+"""
+
+
+class AboutStory(Widget):
+    """Button that opens the standardized AboutScreen modal."""
+
+    DEFAULT_CSS = """
+    AboutStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    AboutStory Button {
+        height: 3;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("AboutScreen", classes="story-heading")
+            yield Static(
+                "Standardized About dialog: headline bar, a meta line "
+                "(version - author - release - license), description, a "
+                "divider, a random quote from the bundled de/en pool, an "
+                "optional clickable URL, and a close button. The width is "
+                "computed from the longest content line. Close with ESC, "
+                "the button, or a click outside.",
+                classes="story-description",
+            )
+            yield Button("Open About dialog", id="about-open", variant="primary")
+            yield Static(
+                "Status: not opened yet",
+                id="about-result",
+                classes="story-result",
+            )
+            yield Static(_ABOUT_CODE, markup=False, classes="story-code")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id != "about-open":
+            return
+        self.app.push_screen(
+            AboutScreen(
+                app_name="textual-widgets",
+                version=__version__,
+                author=__author__,
+                release="2026",
+                description=(
+                    "Reusable Textual widgets for terminal user interfaces.\nThis dialog is itself one of them."
+                ),
+                lang="en",
+                license="Apache 2.0",
+                url="https://github.com/michaelblaess/textual-widgets",
+            ),
+            callback=self._on_closed,
+        )
+        with contextlib.suppress(Exception):
+            self.query_one("#about-result", Static).update("Status: dialog open")
+
+    def _on_closed(self, _result: None) -> None:
+        with contextlib.suppress(Exception):
+            self.query_one("#about-result", Static).update("Status: dialog closed")
+
+
+# ----------------------------------------------------------------------
+# BaseSettingsScreen
+# ----------------------------------------------------------------------
+
+
+_SETTINGS_CODE = """\
+from textual.widgets import Checkbox, TabPane
+from textual_widgets import BaseSettingsScreen
+
+class MySettingsScreen(BaseSettingsScreen):
+    def app_tabs(self) -> ComposeResult:           # Hook 1: own tabs
+        with TabPane('Display', id='tab-display'):
+            yield Checkbox('Line numbers', id='set-lines')
+
+    def collect_app_settings(self, settings):      # Hook 2: read values
+        settings['line_numbers'] = self.query_one('#set-lines', Checkbox).value
+
+self.push_screen(MySettingsScreen(current_settings, lang='en'),
+                 callback=self._on_settings_closed)
+"""
+
+
+class _DemoSettingsScreen(BaseSettingsScreen):
+    """Concrete BaseSettingsScreen subclass for the storybook."""
+
+    def app_tabs(self) -> ComposeResult:
+        with TabPane("Display", id="settings-tab-display"):
+            with Horizontal(classes="settings-row"):
+                yield Label("Theme variant:")
+                yield Select[str](
+                    [("Dark", "dark"), ("Light", "light")],
+                    value=str(self._settings.get("variant", "dark")),
+                    allow_blank=False,
+                    id="demo-variant",
+                )
+            yield Checkbox(
+                "Show line numbers",
+                value=bool(self._settings.get("line_numbers", True)),
+                id="demo-linenumbers",
+            )
+            yield Static(
+                "The Language tab above ships with BaseSettingsScreen — "
+                "this Display tab comes from the app_tabs() hook.",
+                classes="settings-hint",
+            )
+
+    def collect_app_settings(self, settings: dict[str, object]) -> None:
+        variant = self.query_one("#demo-variant", Select).value
+        if isinstance(variant, str):
+            settings["variant"] = variant
+        settings["line_numbers"] = self.query_one("#demo-linenumbers", Checkbox).value
+
+
+class SettingsStory(Widget):
+    """Button that opens a BaseSettingsScreen subclass."""
+
+    DEFAULT_CSS = """
+    SettingsStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    SettingsStory Button {
+        height: 3;
+        margin-bottom: 1;
+    }
+    """
+
+    def __init__(self, **kwargs: object) -> None:
+        super().__init__(**kwargs)
+        # Persisted between openings — mimics the app's settings store.
+        self._settings: dict[str, object] = {
+            "language": "en",
+            "variant": "dark",
+            "line_numbers": True,
+        }
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("BaseSettingsScreen", classes="story-heading")
+            yield Static(
+                "Base class for app settings dialogs. It ships a Language "
+                "tab, Save/Cancel buttons and Esc/Ctrl+S bindings; the app "
+                "subclasses it and overrides two hooks — app_tabs() for its "
+                "own TabPanes and collect_app_settings() to harvest the "
+                "values. Returns the changed settings dict, or None on cancel.",
+                classes="story-description",
+            )
+            yield Button("Open Settings dialog", id="settings-open", variant="primary")
+            yield Static(
+                "Current settings: language=en, variant=dark, line_numbers=True",
+                id="settings-result",
+                classes="story-result",
+            )
+            yield Static(_SETTINGS_CODE, markup=False, classes="story-code")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id != "settings-open":
+            return
+        lang = str(self._settings.get("language", "en"))
+        self.app.push_screen(
+            _DemoSettingsScreen(self._settings, lang=lang),
+            callback=self._on_settings_closed,
+        )
+
+    def _on_settings_closed(self, result: dict[str, object] | None) -> None:
+        if result is None:
+            self._update_result("cancelled — settings unchanged")
+            return
+        self._settings = result
+        summary = ", ".join(f"{k}={v}" for k, v in result.items())
+        self._update_result(f"saved — {summary}")
+
+    def _update_result(self, text: str) -> None:
+        with contextlib.suppress(Exception):
+            self.query_one("#settings-result", Static).update(f"Current settings: {text}")
+
+
+# ----------------------------------------------------------------------
+# LogPanel
+# ----------------------------------------------------------------------
+
+
+_LOGPANEL_CODE = """\
+from textual_widgets import LogMessage, LogPanel, LogRouter
+
+class MyApp(LogRouter, App):          # LogRouter BEFORE App
+    def compose(self) -> ComposeResult:
+        yield LogPanel(lang='en', export_name='my-tool', id='log')
+
+# Any widget, anywhere — does NOT know the LogPanel:
+self.post_message(LogMessage.success('File saved'))
+
+# LogMessage bubbles up to the App, where LogRouter routes it
+# into the first LogPanel in the DOM.
+"""
+
+
+class LogPanelStory(Widget):
+    """Embedded LogPanel + buttons posting LogMessages at each level."""
+
+    DEFAULT_CSS = """
+    LogPanelStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    LogPanelStory .log-buttons {
+        layout: grid;
+        grid-size: 3;
+        grid-gutter: 1;
+        grid-rows: 3;
+        height: auto;
+        margin-bottom: 1;
+    }
+    LogPanelStory .log-buttons Button {
+        width: 1fr;
+        height: 3;
+    }
+    LogPanelStory LogPanel {
+        height: 12;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("LogPanel / LogMessage / LogRouter", classes="story-heading")
+            yield Static(
+                "Decoupled logging. The buttons post a LogMessage; it bubbles "
+                "up to the app, the LogRouter mixin routes it into the LogPanel "
+                "below. The panel adds a timestamp and level colour, keeps a "
+                "plain-text mirror for copy/export, and offers a right-click "
+                "context menu (copy / export / hide). Try right-clicking it.",
+                classes="story-description",
+            )
+            with Horizontal(classes="log-buttons"):
+                yield Button("info", id="log-info")
+                yield Button("success", id="log-success", variant="success")
+                yield Button("warning", id="log-warning", variant="warning")
+                yield Button("error", id="log-error", variant="error")
+                yield Button("debug", id="log-debug")
+                yield Button("clear", id="log-clear")
+            yield LogPanel(lang="en", export_name="storybook", id="story-log-panel")
+            yield Static(_LOGPANEL_CODE, markup=False, classes="story-code")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        button_id = event.button.id or ""
+        if not button_id.startswith("log-"):
+            return
+        level = button_id.removeprefix("log-")
+        if level == "clear":
+            with contextlib.suppress(Exception):
+                self.query_one("#story-log-panel", LogPanel).clear_log()
+            return
+        self.post_message(LogMessage(f"This is a {level}-level message.", level))
+
+
+# ----------------------------------------------------------------------
+# CrashGuard / ErrorScreen
+# ----------------------------------------------------------------------
+
+
+_CRASHGUARD_CODE = """\
+from textual_widgets import CrashGuard
+
+class MyApp(CrashGuard, App):         # CrashGuard BEFORE App
+    def __init__(self) -> None:
+        super().__init__()
+        self.crash_guard_lang = 'en'  # 'de' | 'en'
+
+# An unhandled exception in a handler, timer or worker now
+# shows the ErrorScreen (copyable traceback + Continue / Quit)
+# instead of crashing the whole app.
+"""
+
+
+class CrashGuardStory(Widget):
+    """Demonstrates the CrashGuard mixin and the ErrorScreen dialog."""
+
+    DEFAULT_CSS = """
+    CrashGuardStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    CrashGuardStory Button {
+        height: 3;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("CrashGuard / ErrorScreen", classes="story-heading")
+            yield Static(
+                "The CrashGuard mixin catches unhandled exceptions instead of "
+                "letting Textual tear the app down. It shows the ErrorScreen: "
+                "an apology, the error line, a scrollable copyable traceback "
+                "and Copy / Continue / Quit buttons. 'Raise an exception' "
+                "triggers a real crash caught by the guard; 'Show ErrorScreen' "
+                "opens the dialog directly with a sample traceback.",
+                classes="story-description",
+            )
+            yield Button("Raise an exception (caught by CrashGuard)", id="cg-raise", variant="error")
+            yield Button("Show ErrorScreen directly", id="cg-show", variant="primary")
+            yield Static(_CRASHGUARD_CODE, markup=False, classes="story-code")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "cg-raise":
+            raise RuntimeError("Demo exception raised from the storybook button handler.")
+        if event.button.id == "cg-show":
+            try:
+                _ = 1 / 0
+            except ZeroDivisionError as exc:
+                report = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+                self.app.push_screen(ErrorScreen(exc, report, lang="en"))

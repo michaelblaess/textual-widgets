@@ -20,6 +20,7 @@ from pathlib import Path
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
+from textual.widget import Widget
 from textual.widgets import ContentSwitcher, Footer, Header, Tree
 
 from textual_widgets.crash_guard import CrashGuard
@@ -36,18 +37,21 @@ from textual_widgets.storybook.stories import (
     SplitterStory,
 )
 
-# Reihenfolge der Stories in der Sidebar = Reihenfolge fuer n/p-Cycle
-_STORIES: list[tuple[str, str]] = [
-    # (id, label)
-    ("story-datepicker", "DatePicker"),
-    ("story-search", "Search"),
-    ("story-contextmenu", "ContextMenu"),
-    ("story-splitter", "Splitter"),
-    ("story-hamburger", "HamburgerMenu"),
-    ("story-about", "AboutScreen"),
-    ("story-settings", "BaseSettingsScreen"),
-    ("story-logpanel", "LogPanel"),
-    ("story-crashguard", "CrashGuard"),
+# Einzige Quelle der Wahrheit: speist sowohl den Sidebar-Tree als auch den
+# ContentSwitcher. So koennen Tree-Leafs und Switcher-Kinder nicht mehr
+# auseinanderdriften (sonst: NoMatches beim Story-Wechsel).
+# Reihenfolge = Reihenfolge in der Sidebar = Reihenfolge fuer n/p-Cycle.
+_STORIES: list[tuple[str, str, type[Widget]]] = [
+    # (id, label, story-Klasse)
+    ("story-datepicker", "DatePicker", DatePickerStory),
+    ("story-search", "Search", SearchStory),
+    ("story-contextmenu", "ContextMenu", ContextMenuStory),
+    ("story-splitter", "Splitter", SplitterStory),
+    ("story-hamburger", "HamburgerMenu", HamburgerStory),
+    ("story-about", "AboutScreen", AboutStory),
+    ("story-settings", "BaseSettingsScreen", SettingsStory),
+    ("story-logpanel", "LogPanel", LogPanelStory),
+    ("story-crashguard", "CrashGuard", CrashGuardStory),
 ]
 
 
@@ -143,16 +147,9 @@ class StorybookApp(CrashGuard, LogRouter, App[None]):
         with Horizontal(id="main"):
             with VerticalScroll(id="sidebar"):
                 yield self._build_sidebar()
-            with ContentSwitcher(initial="story-datepicker", id="content"):
-                yield DatePickerStory(id="story-datepicker")
-                yield SearchStory(id="story-search")
-                yield ContextMenuStory(id="story-contextmenu")
-                yield SplitterStory(id="story-splitter")
-                yield HamburgerStory(id="story-hamburger")
-                yield AboutStory(id="story-about")
-                yield SettingsStory(id="story-settings")
-                yield LogPanelStory(id="story-logpanel")
-                yield CrashGuardStory(id="story-crashguard")
+            with ContentSwitcher(initial=_STORIES[0][0], id="content"):
+                for story_id, _label, story_cls in _STORIES:
+                    yield story_cls(id=story_id)
         yield Footer()
 
     def _build_sidebar(self) -> Tree[str]:
@@ -160,7 +157,7 @@ class StorybookApp(CrashGuard, LogRouter, App[None]):
         tree: Tree[str] = Tree("Widgets", id="widget-tree")
         tree.show_root = False
         tree.guide_depth = 2
-        for story_id, label in _STORIES:
+        for story_id, label, _cls in _STORIES:
             tree.root.add_leaf(label, data=story_id)
         tree.root.expand()
         return tree
@@ -180,7 +177,10 @@ class StorybookApp(CrashGuard, LogRouter, App[None]):
         if event.control.id != "widget-tree":
             return
         story_id = event.node.data
-        if not story_id:
+        # Defensiv: nur zu Stories wechseln, die in _STORIES registriert sind.
+        # Mit der Single-Source koennen Tree und Switcher nicht mehr driften —
+        # der Guard faengt kuenftige Fehlbedienung trotzdem ab (sonst NoMatches).
+        if not story_id or story_id not in {sid for sid, _, _ in _STORIES}:
             return
         switcher = self.query_one("#content", ContentSwitcher)
         switcher.current = story_id
@@ -193,7 +193,7 @@ class StorybookApp(CrashGuard, LogRouter, App[None]):
         self._cycle_story(-1)
 
     def _cycle_story(self, step: int) -> None:
-        ids = [sid for sid, _ in _STORIES]
+        ids = [sid for sid, _, _ in _STORIES]
         switcher = self.query_one("#content", ContentSwitcher)
         current = switcher.current or ids[0]
         try:
@@ -220,7 +220,7 @@ class StorybookApp(CrashGuard, LogRouter, App[None]):
         except Exception:
             return
         current = switcher.current
-        for story_id, label in _STORIES:
+        for story_id, label, _cls in _STORIES:
             if story_id == current:
                 self.sub_title = label
                 return

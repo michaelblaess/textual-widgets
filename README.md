@@ -269,6 +269,139 @@ class MyApp(App):
 
 **CSS requirement:** the target panel needs a size the splitter can override (a percent or cells default both work; `1fr` is too flexible).
 
+### AboutScreen
+
+Standardized About dialog as a modal screen — use it instead of hand-rolling one per app. Layout: headline bar, a meta line (`version · author · release · license`), description, a divider, a quote, an optional clickable URL, and a close button. The dialog width is computed from the longest content line, so the divider sits flush.
+
+| Widget | Description |
+|--------|-------------|
+| `AboutScreen` | Modal dialog. App facts come in as constructor arguments |
+| `Quote` | Dataclass for a quote (`text`, `author`) |
+| `load_quotes(lang)` | Loads the bundled de/en quote pool |
+
+**Features:**
+- App facts (`version`, `author`, `release`, `license`) passed as arguments — never hard-coded in the dialog
+- Width auto-sized from the longest content line; no fixed dimensions
+- Random quote from the bundled de/en pool on each open; override with `quote=` (fixed) or `quotes=` (own list)
+- Optional clickable project URL (OSC-8, CTRL+click)
+- Closes on ESC, the button, or a click outside
+
+```python
+from textual_widgets import AboutScreen
+
+from . import __author__, __version__, __year__
+
+def action_show_about(self) -> None:
+    self.push_screen(AboutScreen(
+        app_name="my-tool",
+        version=__version__,        # without the leading "v"
+        author=__author__,
+        release=__year__,
+        description="One-line summary.\nSecond line.",
+        lang="en",
+        license="Apache 2.0",
+        url="https://github.com/me/my-tool",
+    ))
+```
+
+### BaseSettingsScreen
+
+Base class for app settings dialogs — subclass it instead of building one from scratch. It ships a uniform look, a Language tab (de/en with a restart hint), Save/Cancel buttons, and `Ctrl+S` / `Esc` bindings. The app overrides two hooks.
+
+| Widget | Description |
+|--------|-------------|
+| `BaseSettingsScreen` | `ModalScreen` base class — `dict` in, changed `dict` (or `None`) out |
+
+**Features:**
+- Takes the current settings `dict`, returns the changed `dict` (or `None` on cancel) — storage stays in the app
+- Copies the incoming dict, so cancel discards every change
+- Language tab is built in for every app
+- `app_tabs()` hook adds the app's own `TabPane`s; `collect_app_settings()` hook harvests their values
+- Posts a `LogMessage` on save — routed into the `LogPanel` via `LogRouter`
+
+```python
+from textual.widgets import Checkbox, TabPane
+from textual_widgets import BaseSettingsScreen
+
+class MySettingsScreen(BaseSettingsScreen):
+    def app_tabs(self) -> ComposeResult:           # Hook 1: own tabs
+        with TabPane("Crawl", id="settings-tab-crawl"):
+            yield Checkbox("Respect robots.txt", value=..., id="set-robots")
+
+    def collect_app_settings(self, settings: dict[str, object]) -> None:
+        # Hook 2: write widget values into the result dict
+        settings["respect_robots"] = self.query_one("#set-robots", Checkbox).value
+
+class MyApp(App):
+    def action_show_settings(self) -> None:
+        self.push_screen(
+            MySettingsScreen(self._settings_store.load(), lang="en"),
+            callback=self._on_settings_closed,
+        )
+
+    def _on_settings_closed(self, result: dict[str, object] | None) -> None:
+        if result is None:
+            return  # cancelled
+        self._settings_store.save(result)
+```
+
+### LogPanel / LogMessage / LogRouter
+
+Decoupled logging. Any widget posts a `LogMessage`; it bubbles up to the app, where the `LogRouter` mixin routes it into the `LogPanel`. The widget posting the message never references the panel.
+
+| Widget | Description |
+|--------|-------------|
+| `LogMessage` | Message class. Constructors `LogMessage.info/.success/.warning/.error/.debug` |
+| `LogPanel` | `RichLog`-based panel — timestamps, level colours, plain-text mirror, right-click context menu |
+| `LogRouter` | Mixin for `App` — catches `LogMessage` and writes it to the first `LogPanel` in the DOM |
+
+**Features:**
+- Post a `LogMessage` from anywhere — no reference to the panel needed
+- Timestamp + level colour per line (info / success / warning / error / debug)
+- Plain-text mirror for copy/export (a `RichLog` only stores rendered strips)
+- Built-in right-click context menu: copy / export / hide
+- `hide()` posts `LogPanel.Hidden` so an app can hide a splitter above it too
+- Direct writing without an event still works: `query_one(LogPanel).write_log(text, level)`
+
+```python
+from textual.app import App
+from textual_widgets import LogMessage, LogPanel, LogRouter
+
+class MyApp(LogRouter, App):          # LogRouter BEFORE App
+    def compose(self) -> ComposeResult:
+        yield LogPanel(lang="en", export_name="my-tool", id="log")
+
+# Any widget, anywhere — does NOT know the LogPanel:
+self.post_message(LogMessage.success("File saved"))
+```
+
+### CrashGuard / ErrorScreen
+
+Catches unhandled exceptions instead of letting Textual tear the app down. The `CrashGuard` mixin shows the `ErrorScreen` — an apology, the error line, a scrollable copyable traceback, and Copy / Continue / Quit buttons — and lets the user decide.
+
+| Widget | Description |
+|--------|-------------|
+| `CrashGuard` | Mixin for `App` — intercepts unhandled exceptions |
+| `ErrorScreen` | Modal dialog with a copyable error report |
+
+**Features:**
+- Catches exceptions from message handlers, timers and workers (everything goes through `_handle_exception`)
+- Shows a copyable traceback; the user picks Continue (keep working) or Quit
+- `crash_guard_lang` selects the dialog language (`de` / `en`)
+- Re-entrancy guard: a second error while the dialog is open falls back to the regular crash path
+
+```python
+from textual.app import App
+from textual_widgets import CrashGuard
+
+class MyApp(CrashGuard, App):         # CrashGuard BEFORE App
+    def __init__(self) -> None:
+        super().__init__()
+        self.crash_guard_lang = "en"  # "de" | "en"
+```
+
+The order `CrashGuard, App` matters: `super()._handle_exception()` in the mixin must reach `App._handle_exception` (the regular crash path, used as a fallback if the error dialog itself fails). Errors raised before `app.run()` in `__main__.py` are not caught — wrap those in their own `try/except`.
+
 ## Helpers
 
 ### Terminal Title (set_terminal_title / reset_terminal_title)

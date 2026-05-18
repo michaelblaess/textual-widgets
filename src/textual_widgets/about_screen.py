@@ -174,6 +174,7 @@ class AboutScreen(ModalScreen[None]):
         release: str,
         description: str,
         lang: str = "en",
+        license: str | None = None,
         quote: Quote | None = None,
         quotes: list[Quote] | None = None,
         url: str | None = None,
@@ -195,6 +196,9 @@ class AboutScreen(ModalScreen[None]):
                 Beschreibungstext. Darf Zeilenumbrueche enthalten.
             lang:
                 Sprachkuerzel ('de' oder 'en') fuer Footer und Zitatpool.
+            license:
+                Optionale Lizenzangabe (z.B. "Apache 2.0"). Wird als letztes
+                Element an die Meta-Zeile angehaengt.
             quote:
                 Optionales festes Zitat. Wenn gesetzt, wird kein zufaelliges
                 Zitat aus dem Pool gewaehlt.
@@ -214,6 +218,7 @@ class AboutScreen(ModalScreen[None]):
         self._author = author
         self._release = release
         self._description = description.rstrip("\n")
+        self._license = license
         self._url = url
         self._lang = lang if lang in _FOOTER_TEXT else "en"
         self._footer = footer if footer is not None else _FOOTER_TEXT[self._lang]
@@ -248,13 +253,16 @@ class AboutScreen(ModalScreen[None]):
         self.query_one("#about-dialog").styles.width = self._dialog_width()
 
     def _build_meta(self) -> Text:
-        """Baut die Meta-Zeile 'version - Autor - Release'."""
+        """Baut die Meta-Zeile 'version - Autor - Release - Lizenz'."""
         text = Text()
         text.append(f"v{self._version}", style="bold")
         text.append("   ·   ", style="dim")
         text.append(self._author, style="bold")
         text.append("   ·   ", style="dim")
         text.append(self._release, style="bold")
+        if self._license:
+            text.append("   ·   ", style="dim")
+            text.append(self._license, style="bold")
         return text
 
     @staticmethod

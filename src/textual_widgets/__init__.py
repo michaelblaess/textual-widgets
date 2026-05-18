@@ -1,6 +1,6 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.13.0"
+__version__ = "0.14.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.about_screen import AboutScreen, Quote, load_quotes

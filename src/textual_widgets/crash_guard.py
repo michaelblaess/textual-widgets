@@ -46,8 +46,8 @@ else:
 _TEXTS: dict[str, dict[str, str]] = {
     "de": {
         "title": "Ein Fehler ist aufgetreten",
-        "apology": ("Entschuldigung - in der Anwendung ist ein\nunerwarteter Fehler aufgetreten."),
-        "hint": ("Du kannst den Fehlerbericht kopieren und weiterarbeiten\noder die Anwendung beenden."),
+        "apology": "Entschuldigung - in der Anwendung ist ein unerwarteter Fehler aufgetreten.",
+        "hint": "Du kannst den Fehlerbericht kopieren und weiterarbeiten oder die Anwendung beenden.",
         "copy": "Kopieren",
         "continue": "Weitermachen",
         "quit": "Beenden",
@@ -55,8 +55,8 @@ _TEXTS: dict[str, dict[str, str]] = {
     },
     "en": {
         "title": "An error has occurred",
-        "apology": ("Sorry - an unexpected error occurred in the\napplication."),
-        "hint": ("You can copy the error report and keep working,\nor quit the application."),
+        "apology": "Sorry - an unexpected error occurred in the application.",
+        "hint": "You can copy the error report and keep working, or quit the application.",
         "copy": "Copy",
         "continue": "Continue",
         "quit": "Quit",

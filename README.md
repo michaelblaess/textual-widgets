@@ -346,6 +346,7 @@ Bordered header panel that shows label/value pairs in an N-column grid — for c
 
 **Features:**
 - Label/value pairs in a configurable N-column grid
+- Row-major or column-major fill (`fill="column"` keeps a theme in one column)
 - Per-value colour (`value_style`) and right-alignment (`value_align`)
 - Navigable items render `< value >` and post `Navigated`
 - Optional title and action links (action click posts `ActionPressed`)

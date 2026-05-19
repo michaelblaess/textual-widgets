@@ -40,6 +40,7 @@ from textual.css.query import NoMatches
 from textual.events import Click
 from textual.message import Message
 from textual.reactive import reactive
+from textual.widget import Widget
 from textual.widgets import Static
 
 # Marker vor dem Titel bei collapsible Headern.
@@ -206,6 +207,7 @@ class InfoHeader(Vertical):
         items: list[InfoItem],
         *,
         columns: int = 2,
+        fill: str = "row",
         title: str = "",
         actions: list[InfoAction] | None = None,
         label_width: int = 14,
@@ -223,6 +225,11 @@ class InfoHeader(Vertical):
                 Die anzuzeigenden Label/Wert-Paare.
             columns:
                 Anzahl Label/Wert-Paare pro Zeile (mind. 1).
+            fill:
+                Fuellrichtung des Rasters: "row" verteilt die Items
+                zeilenweise (links nach rechts), "column" spaltenweise
+                (oben nach unten) - so bleiben thematisch zusammengehoerige
+                Items in einer Spalte untereinander.
             title:
                 Optionale Titelzeile ueber den Items.
             actions:
@@ -245,6 +252,7 @@ class InfoHeader(Vertical):
         """
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self._columns = max(1, columns)
+        self._fill = fill if fill in ("row", "column") else "row"
         self._title = title
         self._actions = list(actions or [])
         self._label_width = label_width
@@ -283,13 +291,31 @@ class InfoHeader(Vertical):
         self._apply_collapsed()
 
     def _build_rows(self) -> list[Horizontal]:
-        """Baut die Item-Zeilen (je `columns` Zellen)."""
+        """Baut die Item-Zeilen.
+
+        Bei fill="row" werden die Items zeilenweise verteilt, bei
+        fill="column" spaltenweise. Kuerzere Zeilen werden mit leeren Zellen
+        aufgefuellt, damit die Spalten ueber alle Zeilen ausgerichtet bleiben.
+        """
         self._value_widgets.clear()
         order = list(self._items.values())
+        count = len(order)
+        if count == 0:
+            return []
+
+        cols = self._columns
+        nrows = (count + cols - 1) // cols
         rows: list[Horizontal] = []
-        for start in range(0, len(order), self._columns):
-            chunk = order[start : start + self._columns]
-            rows.append(Horizontal(*[self._build_cell(item) for item in chunk], classes="info-row"))
+        for row in range(nrows):
+            cells: list[Widget] = []
+            for col in range(cols):
+                index = col * nrows + row if self._fill == "column" else row * cols + col
+                if index < count:
+                    cells.append(self._build_cell(order[index]))
+                else:
+                    # Leere Zelle als Platzhalter - haelt die Spaltenbreiten gleich.
+                    cells.append(Static("", classes="info-cell"))
+            rows.append(Horizontal(*cells, classes="info-row"))
         return rows
 
     def _build_cell(self, item: InfoItem) -> Horizontal:

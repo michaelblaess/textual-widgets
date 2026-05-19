@@ -91,6 +91,17 @@ class TestSetValueOffline:
         assert header.collapsed is False
 
 
+class TestFill:
+    def test_default_fill_is_row(self) -> None:
+        assert InfoHeader([])._fill == "row"
+
+    def test_fill_column(self) -> None:
+        assert InfoHeader([], fill="column")._fill == "column"
+
+    def test_invalid_fill_falls_back_to_row(self) -> None:
+        assert InfoHeader([], fill="diagonal")._fill == "row"
+
+
 class _HeaderApp(App[None]):
     def __init__(self, header: InfoHeader) -> None:
         super().__init__()
@@ -127,6 +138,20 @@ class TestInfoHeaderMounted:
             await pilot.pause()
             assert header.collapsed is True
             assert header.query_one("#info-body").display is False
+
+    async def test_column_fill_pads_to_full_grid(self) -> None:
+        # 5 Items, 2 Spalten -> 3 Zeilen, jede Zeile 2 Zellen (letzte gepaddet)
+        header = InfoHeader(
+            [InfoItem(f"k{i}", f"L{i}", str(i)) for i in range(5)],
+            columns=2,
+            fill="column",
+        )
+        app = _HeaderApp(header)
+        async with app.run_test():
+            rows = header.query(".info-row")
+            assert len(rows) == 3
+            for row in rows:
+                assert len(row.children) == 2
 
     async def test_set_items_rebuilds(self) -> None:
         header = InfoHeader([InfoItem("a", "A", "1")], columns=1)

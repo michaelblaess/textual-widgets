@@ -128,6 +128,7 @@ class InfoHeader(Vertical):
         width: 1fr;
         height: 1;
         layout: horizontal;
+        padding: 0 2 0 0;
     }
 
     InfoHeader .info-label {

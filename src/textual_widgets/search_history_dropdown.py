@@ -206,13 +206,15 @@ class SearchInputWithHistory(Vertical):
         height: auto;
         layout: vertical;
     }
-    /* Icon-Modus: flache einzeilige Leiste ohne Rahmen. Das Icon sitzt
-       buendig am linken Rand; der Fokus wird ueber den Hintergrund und
-       die Icon-Farbe angezeigt statt ueber einen Rahmen — so entsteht
-       links/rechts kein Whitespace durch eine Border. */
+    /* Icon-Modus: dreizeilige Leiste ohne Rahmen. Icon und Eingabe sind
+       vertikal zentriert (align: middle) — das gibt die Hoehe einer Border,
+       ohne den Whitespace links/rechts, den eine Border erzeugen wuerde.
+       Das Icon sitzt buendig am linken Rand; der Fokus wird ueber den
+       Hintergrund und die Icon-Farbe angezeigt. */
     SearchInputWithHistory .search-row {
         layout: horizontal;
-        height: 1;
+        height: 3;
+        align: left middle;
         background: $surface;
     }
     SearchInputWithHistory .search-row:focus-within {

@@ -28,6 +28,7 @@ from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.crash_guard import ErrorScreen
 from textual_widgets.date_picker import DatePicker, DatePickerScreen
 from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
+from textual_widgets.info_header import InfoAction, InfoHeader, InfoItem
 from textual_widgets.log_panel import LogMessage, LogPanel
 from textual_widgets.search_history_dropdown import SearchInputWithHistory
 from textual_widgets.settings_screen import BaseSettingsScreen
@@ -926,3 +927,77 @@ class UrlInputStory(Widget):
         text = "cancelled" if url is None else url
         with contextlib.suppress(Exception):
             self.query_one("#url-result", Static).update(f"Status: {text}")
+
+
+# ----------------------------------------------------------------------
+# InfoHeader
+# ----------------------------------------------------------------------
+
+
+_INFOHEADER_CODE = """\
+from textual_widgets import InfoHeader, InfoItem, InfoAction
+
+yield InfoHeader(
+    [
+        InfoItem('host', 'Host', 'example.com'),
+        InfoItem('ok', '2xx', '128', value_style='bold green'),
+        InfoItem('err', '4xx', '3', value_style='bold red'),
+        InfoItem('period', 'Period', 'May 2026', navigable=True),
+    ],
+    columns=2,
+    title='Crawl',
+    actions=[InfoAction('open', 'Open report')],
+    collapsible=True,
+)
+
+# runtime: header.set_value('ok', '200', value_style='bold green')
+"""
+
+
+class InfoHeaderStory(Widget):
+    """InfoHeader demo: coloured values, a navigable item, an action, collapse."""
+
+    DEFAULT_CSS = """
+    InfoHeaderStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("InfoHeader", classes="story-heading")
+            yield Static(
+                "Bordered header panel showing label/value pairs in an "
+                "N-column grid. Values can be coloured and right-aligned, "
+                "items can be navigable (< value >), actions post a message, "
+                "and the whole header can collapse. Click the title to "
+                "collapse it.",
+                classes="story-description",
+            )
+            yield InfoHeader(
+                [
+                    InfoItem("host", "Host", "example.com"),
+                    InfoItem("depth", "Max depth", "3"),
+                    InfoItem("ok", "2xx", "128", value_style="bold green", value_align="right"),
+                    InfoItem("err", "4xx", "3", value_style="bold red", value_align="right"),
+                    InfoItem("period", "Period", "May 2026", navigable=True),
+                    InfoItem("dur", "Duration", "15s", value_align="right"),
+                ],
+                columns=2,
+                title="Crawl",
+                actions=[InfoAction("open", "Open report")],
+                collapsible=True,
+            )
+            yield Static("Status: idle", id="ih-result", classes="story-result")
+            yield Static(_INFOHEADER_CODE, markup=False, classes="story-code")
+
+    def on_info_header_action_pressed(self, event: InfoHeader.ActionPressed) -> None:
+        self._show(f"action '{event.key}'")
+
+    def on_info_header_navigated(self, event: InfoHeader.Navigated) -> None:
+        self._show(f"navigated '{event.key}' {event.direction}")
+
+    def _show(self, text: str) -> None:
+        with contextlib.suppress(Exception):
+            self.query_one("#ih-result", Static).update(f"Status: {text}")

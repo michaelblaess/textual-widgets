@@ -334,6 +334,43 @@ def _on_url_entered(self, url: str | None) -> None:
     self.start_url = url  # always carries an http/https scheme
 ```
 
+### InfoHeader
+
+Bordered header panel that shows label/value pairs in an N-column grid — for consolidating an app's status info into one compact place.
+
+| Widget | Description |
+|--------|-------------|
+| `InfoItem` | A label/value pair |
+| `InfoAction` | A clickable action link |
+| `InfoHeader` | Bordered panel rendering the items |
+
+**Features:**
+- Label/value pairs in a configurable N-column grid
+- Per-value colour (`value_style`) and right-alignment (`value_align`)
+- Navigable items render `< value >` and post `Navigated`
+- Optional title and action links (action click posts `ActionPressed`)
+- Collapsible — click the title or call `toggle()`
+- Runtime updates via `set_value()` / `set_items()`
+
+```python
+from textual_widgets import InfoHeader, InfoItem, InfoAction
+
+yield InfoHeader(
+    [
+        InfoItem("host", "Host", "example.com"),
+        InfoItem("ok", "2xx", "128", value_style="bold green", value_align="right"),
+        InfoItem("period", "Period", "May 2026", navigable=True),
+    ],
+    columns=2,
+    title="Crawl",
+    actions=[InfoAction("open", "Open report")],
+    collapsible=True,
+)
+
+# runtime
+header.set_value("ok", "200", value_style="bold green")
+```
+
 ### BaseSettingsScreen
 
 Base class for app settings dialogs — subclass it instead of building one from scratch. It ships a uniform look, a Language tab (de/en with a restart hint), Save/Cancel buttons, and `Ctrl+S` / `Esc` bindings. The app overrides two hooks.

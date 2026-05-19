@@ -334,6 +334,43 @@ def _on_url_entered(self, url: str | None) -> None:
     self.start_url = url  # enthält immer ein http/https-Schema
 ```
 
+### InfoHeader
+
+Umrandetes Kopf-Panel, das Label/Wert-Paare in einem Raster mit N Spalten zeigt — um die Status-Informationen einer App kompakt an einer Stelle zu bündeln.
+
+| Widget | Beschreibung |
+|--------|--------------|
+| `InfoItem` | Ein Label/Wert-Paar |
+| `InfoAction` | Ein anklickbarer Action-Link |
+| `InfoHeader` | Umrandetes Panel, das die Items rendert |
+
+**Features:**
+- Label/Wert-Paare in einem Raster mit konfigurierbarer Spaltenzahl
+- Farbe je Wert (`value_style`) und Rechtsbündigkeit (`value_align`)
+- Navigierbare Items rendern `< Wert >` und posten `Navigated`
+- Optionale Titelzeile und Action-Links (Klick postet `ActionPressed`)
+- Ein-/ausklappbar — Klick auf den Titel oder `toggle()`
+- Laufzeit-Updates über `set_value()` / `set_items()`
+
+```python
+from textual_widgets import InfoHeader, InfoItem, InfoAction
+
+yield InfoHeader(
+    [
+        InfoItem("host", "Host", "example.com"),
+        InfoItem("ok", "2xx", "128", value_style="bold green", value_align="right"),
+        InfoItem("period", "Zeitraum", "Mai 2026", navigable=True),
+    ],
+    columns=2,
+    title="Crawl",
+    actions=[InfoAction("open", "Bericht öffnen")],
+    collapsible=True,
+)
+
+# Laufzeit
+header.set_value("ok", "200", value_style="bold green")
+```
+
 ### BaseSettingsScreen
 
 Basisklasse für App-Settings-Dialoge — davon erben, statt einen von Grund auf zu bauen. Sie liefert einen einheitlichen Look, einen Sprach-Tab (de/en mit Neustart-Hinweis), Save/Cancel-Buttons und `Strg+S` / `Esc`-Bindings. Die App überschreibt zwei Hooks.

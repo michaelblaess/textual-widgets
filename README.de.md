@@ -346,6 +346,7 @@ Umrandetes Kopf-Panel, das Label/Wert-Paare in einem Raster mit N Spalten zeigt 
 
 **Features:**
 - Label/Wert-Paare in einem Raster mit konfigurierbarer Spaltenzahl
+- Zeilen- oder spaltenweise Füllung (`fill="column"` hält ein Thema in einer Spalte)
 - Farbe je Wert (`value_style`) und Rechtsbündigkeit (`value_align`)
 - Navigierbare Items rendern `< Wert >` und posten `Navigated`
 - Optionale Titelzeile und Action-Links (Klick postet `ActionPressed`)

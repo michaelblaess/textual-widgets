@@ -304,6 +304,36 @@ def action_show_about(self) -> None:
     ))
 ```
 
+### UrlInputScreen
+
+Modaler Dialog zur Eingabe einer http/https-URL — für Apps, die eine Ziel-URL brauchen, aber ohne eine gestartet wurden.
+
+| Widget | Beschreibung |
+|--------|--------------|
+| `UrlInputScreen` | Modaler Dialog. Liefert die eingegebene URL oder `None` bei Abbruch |
+
+**Features:**
+- Validiert die Eingabe als `http://` / `https://`-URL
+- Eingaben ohne Schema werden automatisch mit `https://` ergänzt
+- Ungültige Eingaben zeigen eine Inline-Fehlermeldung, der Dialog bleibt offen
+- `Enter` oder der OK-Button senden ab, `Esc` oder Abbrechen liefern `None`
+- Lokalisierte Texte (de/en), optional eigener Titel, Hinweis und Platzhalter
+
+```python
+from textual_widgets import UrlInputScreen
+
+def action_enter_url(self) -> None:
+    self.push_screen(
+        UrlInputScreen(lang="de"),
+        callback=self._on_url_entered,
+    )
+
+def _on_url_entered(self, url: str | None) -> None:
+    if url is None:
+        return  # abgebrochen
+    self.start_url = url  # enthält immer ein http/https-Schema
+```
+
 ### BaseSettingsScreen
 
 Basisklasse für App-Settings-Dialoge — davon erben, statt einen von Grund auf zu bauen. Sie liefert einen einheitlichen Look, einen Sprach-Tab (de/en mit Neustart-Hinweis), Save/Cancel-Buttons und `Strg+S` / `Esc`-Bindings. Die App überschreibt zwei Hooks.

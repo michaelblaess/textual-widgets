@@ -1,6 +1,6 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.14.3"
+__version__ = "0.15.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.about_screen import AboutScreen, Quote, load_quotes
@@ -16,6 +16,7 @@ from textual_widgets.search_history_dropdown import (
 from textual_widgets.settings_screen import BaseSettingsScreen
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
 from textual_widgets.terminal_title import reset_terminal_title, set_terminal_title
+from textual_widgets.url_input_screen import UrlInputScreen
 
 __all__ = [
     "AboutScreen",
@@ -36,6 +37,7 @@ __all__ = [
     "Quote",
     "SearchHistoryDropdown",
     "SearchInputWithHistory",
+    "UrlInputScreen",
     "VerticalSplitter",
     "load_quotes",
     "reset_terminal_title",

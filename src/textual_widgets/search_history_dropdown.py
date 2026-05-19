@@ -206,27 +206,27 @@ class SearchInputWithHistory(Vertical):
         height: auto;
         layout: vertical;
     }
-    /* Icon-Modus: Wrapper traegt den gemeinsamen Rahmen statt Input,
-       damit Icon und Input wie EINE Box wirken (analog Textual Command-Palette).
-       Border standardmaessig unsichtbar ($background), nur bei Focus accent —
-       gleiches Pattern wie Textuals Default-Input. */
+    /* Icon-Modus: flache einzeilige Leiste ohne Rahmen. Das Icon sitzt
+       buendig am linken Rand; der Fokus wird ueber den Hintergrund und
+       die Icon-Farbe angezeigt statt ueber einen Rahmen — so entsteht
+       links/rechts kein Whitespace durch eine Border. */
     SearchInputWithHistory .search-row {
         layout: horizontal;
-        height: 3;
+        height: 1;
         background: $surface;
-        border: tall $background;
     }
     SearchInputWithHistory .search-row:focus-within {
         background: $surface-darken-1;
-        border: tall $accent;
     }
     SearchInputWithHistory .search-icon {
         width: auto;
-        min-width: 4;
         height: 1;
-        content-align: center middle;
+        content-align: left middle;
         background: transparent;
         color: $text-muted;
+    }
+    SearchInputWithHistory .search-row:focus-within .search-icon {
+        color: $accent;
     }
     SearchInputWithHistory .search-row Input {
         width: 1fr;

@@ -544,7 +544,7 @@ wheels = [
 
 [[package]]
 name = "textual-widgets"
-version = "0.17.0"
+version = "0.17.1"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },

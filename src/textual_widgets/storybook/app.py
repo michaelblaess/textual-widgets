@@ -35,6 +35,7 @@ from textual_widgets.storybook.stories import (
     SearchStory,
     SettingsStory,
     SplitterStory,
+    UrlInputStory,
 )
 
 # Einzige Quelle der Wahrheit: speist sowohl den Sidebar-Tree als auch den
@@ -49,6 +50,7 @@ _STORIES: list[tuple[str, str, type[Widget]]] = [
     ("story-splitter", "Splitter", SplitterStory),
     ("story-hamburger", "HamburgerMenu", HamburgerStory),
     ("story-about", "AboutScreen", AboutStory),
+    ("story-urlinput", "UrlInputScreen", UrlInputStory),
     ("story-settings", "BaseSettingsScreen", SettingsStory),
     ("story-logpanel", "LogPanel", LogPanelStory),
     ("story-crashguard", "CrashGuard", CrashGuardStory),

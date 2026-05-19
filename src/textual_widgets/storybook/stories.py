@@ -32,6 +32,7 @@ from textual_widgets.log_panel import LogMessage, LogPanel
 from textual_widgets.search_history_dropdown import SearchInputWithHistory
 from textual_widgets.settings_screen import BaseSettingsScreen
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
+from textual_widgets.url_input_screen import UrlInputScreen
 
 # ----------------------------------------------------------------------
 # DatePicker
@@ -861,3 +862,67 @@ class CrashGuardStory(Widget):
             except ZeroDivisionError as exc:
                 report = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
                 self.app.push_screen(ErrorScreen(exc, report, lang="en"))
+
+
+# ----------------------------------------------------------------------
+# UrlInputScreen
+# ----------------------------------------------------------------------
+
+
+_URLINPUT_CODE = """\
+from textual_widgets import UrlInputScreen
+
+def action_enter_url(self) -> None:
+    self.push_screen(
+        UrlInputScreen(lang='en'),
+        callback=self._on_url_entered,
+    )
+
+def _on_url_entered(self, url: str | None) -> None:
+    if url is None:
+        return                  # cancelled
+    self.start_url = url        # 'https://...' guaranteed
+"""
+
+
+class UrlInputStory(Widget):
+    """Button that opens the UrlInputScreen modal."""
+
+    DEFAULT_CSS = """
+    UrlInputStory {
+        layout: vertical;
+        height: 1fr;
+    }
+    UrlInputStory Button {
+        height: 3;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll():
+            yield Static("UrlInputScreen", classes="story-heading")
+            yield Static(
+                "Modal dialog asking for an http/https URL. Input without a "
+                "scheme gets 'https://' prepended; invalid input shows an "
+                "inline error and keeps the dialog open. Enter or OK submit, "
+                "ESC or Cancel return None.",
+                classes="story-description",
+            )
+            yield Button("Open URL dialog", id="url-open", variant="primary")
+            yield Static(
+                "Status: not opened yet",
+                id="url-result",
+                classes="story-result",
+            )
+            yield Static(_URLINPUT_CODE, markup=False, classes="story-code")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id != "url-open":
+            return
+        self.app.push_screen(UrlInputScreen(lang="en"), callback=self._on_url)
+
+    def _on_url(self, url: str | None) -> None:
+        text = "cancelled" if url is None else url
+        with contextlib.suppress(Exception):
+            self.query_one("#url-result", Static).update(f"Status: {text}")

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "textual-widgets"
-version = "0.20.0"
+version = "0.20.1"
 description = "Wiederverwendbare Textual-Widgets: DatePicker, SearchHistoryDropdown, ContextMenu, Splitter, HamburgerMenu und mehr"
 requires-python = ">=3.12"
 dependencies = [

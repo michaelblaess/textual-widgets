@@ -67,6 +67,10 @@ class InfoItem:
         navigable:
             Wenn True, wird der Wert zwischen zwei Pfeilen dargestellt;
             ein Klick postet `InfoHeader.Navigated`.
+        markup:
+            Wenn True, wird ``value`` als Rich/Textual-Markup geparst (inkl.
+            ``[@click=...]``-Aktionen). Default False — Werte sind dann
+            Plain-Text und eckige Klammern bleiben sichtbar.
     """
 
     key: str
@@ -75,6 +79,7 @@ class InfoItem:
     value_style: str = ""
     value_align: str = "left"
     navigable: bool = False
+    markup: bool = False
 
 
 @dataclass(frozen=True)
@@ -349,8 +354,17 @@ class InfoHeader(Vertical):
 
     @staticmethod
     def _value_text(item: InfoItem) -> Text:
-        """Baut den Wert als Rich Text (mit optionalem Style)."""
-        return Text(item.value, style=item.value_style) if item.value_style else Text(item.value)
+        """Baut den Wert als Rich Text.
+
+        Bei ``item.markup=True`` wird ``value`` als Markup geparst — damit
+        klappen ``[@click=...]``-Aktionen (siehe ClickableLinksMixin). Sonst
+        wird der String 1:1 als Plain-Text gerendert, damit eckige Klammern
+        in Werten nicht als Tags interpretiert werden.
+        """
+        sub = Text.from_markup(item.value, overflow="fold") if item.markup else Text(item.value)
+        if item.value_style:
+            sub.stylize(item.value_style)
+        return sub
 
     def _title_text(self) -> str:
         """Baut die Titelzeile (mit Marker, wenn collapsible)."""
@@ -368,7 +382,9 @@ class InfoHeader(Vertical):
             key:
                 Key des Items.
             value:
-                Neuer Wert-Text.
+                Neuer Wert-Text. Wenn ``item.markup=True``, wird er als
+                Markup geparst (Action-Markup wie ``[@click=...]`` wird
+                zu klickbaren Regionen).
             value_style:
                 Optionaler neuer Rich-Style. None laesst den bisherigen
                 Style unveraendert.
@@ -377,10 +393,11 @@ class InfoHeader(Vertical):
         if item is None:
             return
         style = item.value_style if value_style is None else value_style
-        self._items[key] = replace(item, value=value, value_style=style)
+        new_item = replace(item, value=value, value_style=style)
+        self._items[key] = new_item
         widget = self._value_widgets.get(key)
         if widget is not None:
-            widget.update(Text(value, style=style) if style else Text(value))
+            widget.update(self._value_text(new_item))
 
     def set_items(self, items: list[InfoItem]) -> None:
         """Ersetzt alle Items und baut den Koerper neu auf.

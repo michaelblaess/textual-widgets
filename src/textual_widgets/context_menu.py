@@ -244,7 +244,14 @@ class ContextMenuScreen(ModalScreen[str | None]):
         self.dismiss(str(option_id) if option_id else None)
 
     def on_click(self, event: Click) -> None:
-        """Klick ausserhalb des Menue-Containers → Cancel."""
+        """Klick im Modal: immer hier konsumieren, sonst Klick ausserhalb → Cancel.
+
+        Wichtig: ``event.stop()`` unbedingt — sonst bubblet derselbe Klick,
+        der das Menue gerade ausgewaehlt/abgebrochen hat, nach dem
+        ``dismiss()`` weiter zu dem Widget UNTER dem Modal (z.B. einer
+        DataTable, deren Row-Selection sonst sofort mitfeuert).
+        """
+        event.stop()
         try:
             container = self.query_one(Vertical)
             if not container.region.contains(event.screen_x, event.screen_y):

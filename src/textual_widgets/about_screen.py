@@ -241,7 +241,12 @@ class AboutScreen(ModalScreen[None]):
                 yield Rule(line_style="solid")
                 yield Static(self._build_quote(self._quote), id="about-quote")
             if self._url:
-                yield Static(self._build_url(self._url), id="about-url")
+                # Klickbar ohne CTRL + Hover-Highlight via Textual-Action-Markup.
+                yield Static(
+                    f"[@click=screen.open_about_url()][underline]{self._url}[/underline][/]",
+                    id="about-url",
+                    markup=True,
+                )
             with Center(id="about-footer"):
                 yield Button(self._footer, variant="primary", id="about-close")
 
@@ -275,10 +280,15 @@ class AboutScreen(ModalScreen[None]):
         text.append(f"- {quote.author}", style="bold")
         return text
 
-    @staticmethod
-    def _build_url(url: str) -> Text:
-        """Baut die URL als anklickbaren Link (OSC-8, CTRL+Klick)."""
-        return Text(url, style=f"underline link {url}")
+    def action_open_about_url(self) -> None:
+        """Oeffnet die zur AboutScreen gehoerige URL im Browser."""
+        import contextlib
+        import webbrowser
+
+        if not self._url:
+            return
+        with contextlib.suppress(Exception):
+            webbrowser.open(self._url)
 
     def _dialog_width(self) -> int:
         """Berechnet die Dialogbreite aus der laengsten Inhaltszeile."""

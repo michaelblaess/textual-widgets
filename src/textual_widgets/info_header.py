@@ -137,6 +137,12 @@ class InfoHeader(Vertical):
         padding: 0 2 0 0;
     }
 
+    InfoHeader .info-separator {
+        width: auto;
+        height: 1;
+        color: $text-muted;
+    }
+
     InfoHeader .info-label {
         height: 1;
         color: $text-muted;
@@ -216,6 +222,7 @@ class InfoHeader(Vertical):
         title: str = "",
         actions: list[InfoAction] | None = None,
         label_width: int = 14,
+        separator: str | None = None,
         collapsible: bool = False,
         collapsed: bool = False,
         name: str | None = None,
@@ -241,6 +248,12 @@ class InfoHeader(Vertical):
                 Optionale Action-Links unten rechts.
             label_width:
                 Feste Breite der Label-Spalte in Zellen.
+            separator:
+                Optionaler Separator-String, der zwischen den Zellen einer
+                Reihe gerendert wird (z.B. ``" | "``). Default ``None``
+                bedeutet keinen Trenner — die Zellen sind dann nur durch
+                Whitespace getrennt. Der Separator erscheint nicht vor der
+                ersten und nicht nach der letzten Zelle einer Reihe.
             collapsible:
                 Wenn True, kann der Header ein-/ausgeklappt werden (per
                 Klick auf die Titelzeile oder via toggle()).
@@ -261,6 +274,7 @@ class InfoHeader(Vertical):
         self._title = title
         self._actions = list(actions or [])
         self._label_width = label_width
+        self._separator = separator
         self._collapsible = collapsible
         self._items: dict[str, InfoItem] = {}
         self._init_items(items)
@@ -301,6 +315,8 @@ class InfoHeader(Vertical):
         Bei fill="row" werden die Items zeilenweise verteilt, bei
         fill="column" spaltenweise. Kuerzere Zeilen werden mit leeren Zellen
         aufgefuellt, damit die Spalten ueber alle Zeilen ausgerichtet bleiben.
+        Optionaler ``separator`` wird zwischen den Zellen einer Reihe
+        eingefuegt (nicht vor der ersten / nicht nach der letzten).
         """
         self._value_widgets.clear()
         order = list(self._items.values())
@@ -315,6 +331,8 @@ class InfoHeader(Vertical):
             cells: list[Widget] = []
             for col in range(cols):
                 index = col * nrows + row if self._fill == "column" else row * cols + col
+                if col > 0 and self._separator is not None:
+                    cells.append(Static(self._separator, classes="info-separator"))
                 if index < count:
                     cells.append(self._build_cell(order[index]))
                 else:

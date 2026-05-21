@@ -161,3 +161,23 @@ class TestInfoHeaderMounted:
             header.set_items([InfoItem("x", "X", "1"), InfoItem("y", "Y", "2")])
             await pilot.pause()
             assert len(header.query(".info-row")) == 2
+
+    async def test_separator_inserted_between_cells(self) -> None:
+        # 3 Cells in einer Reihe + Separator -> 2 Separatoren (zwischen 1-2 und 2-3).
+        header = InfoHeader(
+            [InfoItem(f"k{i}", f"L{i}", str(i)) for i in range(3)],
+            columns=3,
+            separator=" | ",
+        )
+        app = _HeaderApp(header)
+        async with app.run_test():
+            assert len(header.query(".info-separator")) == 2
+
+    async def test_no_separator_by_default(self) -> None:
+        header = InfoHeader(
+            [InfoItem(f"k{i}", f"L{i}", str(i)) for i in range(3)],
+            columns=3,
+        )
+        app = _HeaderApp(header)
+        async with app.run_test():
+            assert len(header.query(".info-separator")) == 0

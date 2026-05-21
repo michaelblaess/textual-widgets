@@ -148,11 +148,16 @@ class AboutScreen(ModalScreen[None]):
         width: 1fr;
     }
 
-    AboutScreen #about-url {
+    AboutScreen #about-url, AboutScreen #about-homepage-url {
         width: 1fr;
         content-align: center middle;
         color: $accent;
         margin-top: 1;
+    }
+
+    /* Homepage steht direkt unter der Repo-URL - kein doppeltes margin. */
+    AboutScreen #about-homepage-url {
+        margin-top: 0;
     }
 
     AboutScreen #about-footer {
@@ -179,6 +184,7 @@ class AboutScreen(ModalScreen[None]):
         quote: Quote | None = None,
         quotes: list[Quote] | None = None,
         url: str | None = None,
+        homepage_url: str | None = "https://www.michaelblaess.de/",
         footer: str | None = None,
     ) -> None:
         """Erstellt den About-Dialog.
@@ -208,7 +214,11 @@ class AboutScreen(ModalScreen[None]):
                 Pools verwendet (zufaellige Auswahl).
             url:
                 Optionale Projekt-/Repo-URL. Wird unter dem Zitat als
-                anklickbarer Link angezeigt (CTRL+Klick oeffnet im Browser).
+                anklickbarer Link angezeigt (Klick oeffnet im Browser).
+            homepage_url:
+                Optionale zweite URL (Autor/Homepage), die direkt unter
+                ``url`` als anklickbarer Link erscheint. Default zeigt auf
+                die Homepage des Autors; mit ``None`` ausblenden.
             footer:
                 Optionaler Footer-Text. Default ist das sprachabhaengige
                 "ESC = Schliessen" / "ESC = Close".
@@ -221,6 +231,7 @@ class AboutScreen(ModalScreen[None]):
         self._description = description.rstrip("\n")
         self._license = license
         self._url = url
+        self._homepage_url = homepage_url
         self._lang = lang if lang in _FOOTER_TEXT else "en"
         self._footer = footer if footer is not None else _FOOTER_TEXT[self._lang]
 
@@ -243,8 +254,14 @@ class AboutScreen(ModalScreen[None]):
             if self._url:
                 # Klickbar ohne CTRL + Hover-Highlight via Textual-Action-Markup.
                 yield Static(
-                    f"[@click=screen.open_about_url()][underline]{self._url}[/underline][/]",
+                    f"[@click=screen.open_about_url('repo')][underline]{self._url}[/underline][/]",
                     id="about-url",
+                    markup=True,
+                )
+            if self._homepage_url:
+                yield Static(
+                    f"[@click=screen.open_about_url('homepage')][underline]{self._homepage_url}[/underline][/]",
+                    id="about-homepage-url",
                     markup=True,
                 )
             with Center(id="about-footer"):
@@ -280,15 +297,22 @@ class AboutScreen(ModalScreen[None]):
         text.append(f"- {quote.author}", style="bold")
         return text
 
-    def action_open_about_url(self) -> None:
-        """Oeffnet die zur AboutScreen gehoerige URL im Browser."""
+    def action_open_about_url(self, target: str = "repo") -> None:
+        """Oeffnet die zur AboutScreen gehoerige URL im Browser.
+
+        Args:
+            target:
+                ``"repo"`` fuer die Projekt-/Repo-URL (Default),
+                ``"homepage"`` fuer die Autor-Homepage.
+        """
         import contextlib
         import webbrowser
 
-        if not self._url:
+        url = self._homepage_url if target == "homepage" else self._url
+        if not url:
             return
         with contextlib.suppress(Exception):
-            webbrowser.open(self._url)
+            webbrowser.open(url)
 
     def _dialog_width(self) -> int:
         """Berechnet die Dialogbreite aus der laengsten Inhaltszeile."""
@@ -299,6 +323,8 @@ class AboutScreen(ModalScreen[None]):
             lines.append(f"- {self._quote.author}")
         if self._url:
             lines.append(self._url)
+        if self._homepage_url:
+            lines.append(self._homepage_url)
         lines.append(self._footer)
 
         content = max((len(line) for line in lines), default=0)

@@ -92,6 +92,16 @@ class TestAboutScreen:
         long = "https://github.com/michaelblaess/some-very-long-repo-name-here"
         assert self._screen(url=long)._dialog_width() >= self._screen(url=short)._dialog_width()
 
+    def test_homepage_url_default(self) -> None:
+        # Default zeigt auf die Autor-Homepage.
+        assert self._screen()._homepage_url == "https://www.michaelblaess.de/"
+
+    def test_homepage_url_can_be_disabled(self) -> None:
+        assert self._screen(homepage_url=None)._homepage_url is None
+
+    def test_homepage_url_custom(self) -> None:
+        assert self._screen(homepage_url="https://example.com")._homepage_url == "https://example.com"
+
     def test_no_license_by_default(self) -> None:
         assert self._screen()._license is None
 

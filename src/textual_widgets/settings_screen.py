@@ -343,10 +343,17 @@ class BaseSettingsScreen(ModalScreen[dict[str, object] | None]):
         self.dismiss(None)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Verarbeitet Klicks auf Save / Cancel."""
+        """Verarbeitet Klicks auf die eigenen Save-/Cancel-Buttons.
+
+        Reagiert NUR auf die beiden bekannten Button-IDs. Fremde Buttons,
+        die eine App in ihren eigenen Tabs ergaenzt (z.B. ein
+        "Verlauf loeschen"-Button), werden ignoriert — sonst wuerde der
+        Dialog bei jedem App-Button-Klick als Abbruch geschlossen. App-Buttons
+        behandelt die Subklasse ueber einen `@on(Button.Pressed, "#id")`-Handler.
+        """
         if event.button.id == "settings-save":
             self.action_save()
-        else:
+        elif event.button.id == "settings-cancel":
             self.action_cancel()
 
     def on_click(self, event: Click) -> None:

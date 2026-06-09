@@ -1,6 +1,6 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.25.1"
+__version__ = "0.26.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.about_screen import AboutScreen, Quote, load_quotes
@@ -9,6 +9,7 @@ from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.crash_guard import CrashGuard, ErrorScreen
 from textual_widgets.date_picker import CalendarGrid, DatePicker, DatePickerScreen
 from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
+from textual_widgets.http_status_screen import HttpStatusScreen
 from textual_widgets.info_header import InfoAction, InfoHeader, InfoItem
 from textual_widgets.log_panel import LogMessage, LogPanel, LogRouter
 from textual_widgets.search_history_dropdown import (
@@ -35,6 +36,7 @@ __all__ = [
     "HamburgerItem",
     "HamburgerMenu",
     "HorizontalSplitter",
+    "HttpStatusScreen",
     "InfoAction",
     "InfoHeader",
     "InfoItem",

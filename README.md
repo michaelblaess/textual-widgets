@@ -334,6 +334,28 @@ def _on_url_entered(self, url: str | None) -> None:
     self.start_url = url  # always carries an http/https scheme
 ```
 
+### HttpStatusScreen
+
+Modal reference dialog listing the common HTTP status codes - grouped and colour-coded by class, with a short factual meaning for each (e.g. to tell a `301` from a `307`).
+
+| Widget | Description |
+|--------|-------------|
+| `HttpStatusScreen` | Modal reference dialog. Dismisses with `None` |
+
+**Features:**
+- Curated, practically relevant codes - one colour-coded table per class (2xx success, 3xx redirection, 4xx client error, 5xx server error)
+- Each row shows code, a short rating and explanation of the standardised meaning (RFC semantics - not a guessed risk rating)
+- Bilingual texts (de/en); an unknown `lang` falls back to `en`
+- Scrollable; closes via `Esc`, `q`, `?` or the Close button
+- Pure look-up dialog - no return value beyond `None`
+
+```python
+from textual_widgets import HttpStatusScreen
+
+def action_show_http_codes(self) -> None:
+    self.push_screen(HttpStatusScreen(lang="en"))
+```
+
 ### InfoHeader
 
 Bordered header panel that shows label/value pairs in an N-column grid — for consolidating an app's status info into one compact place.

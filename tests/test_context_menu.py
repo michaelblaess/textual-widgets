@@ -99,7 +99,9 @@ class TestEstimateSize:
         items = [ContextMenuItem(id="a", label="x" * 100)]
         screen = ContextMenuScreen(items)
         w, _ = screen._estimate_size()
-        assert w == 60  # max-width-Klemme
+        # Lange Labels werden auf _MAX_LABEL_WIDTH (50) gekappt (Umbruch-Schutz),
+        # daher 50 + 4 (Padding + Border) = 54 - unter der 60er CSS-max-width.
+        assert w == screen._MAX_LABEL_WIDTH + 4  # 54
 
     def test_width_scales_with_label_length(self) -> None:
         items = [ContextMenuItem(id="a", label="Hallo Welt 12345678")]

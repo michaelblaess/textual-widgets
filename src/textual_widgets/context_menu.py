@@ -147,7 +147,11 @@ class ContextMenuScreen(ModalScreen[str | None]):
                 continue
 
             label = self._format_label(item)
-            rich_label = Text()
+            # Einzeilig erzwingen: lange Labels duerfen NICHT umbrechen, sonst
+            # belegt ein Item 2+ Zeilen und die Hoehenschaetzung in
+            # _estimate_size (1 Zeile/Item) unterschaetzt -> Menue laeuft unten
+            # aus dem Bild. Stattdessen am Rand mit Ellipsis kuerzen.
+            rich_label = Text(no_wrap=True, overflow="ellipsis")
             rich_label.append(label.ljust(max_label))
             if max_shortcut > 0:
                 rich_label.append("  ")

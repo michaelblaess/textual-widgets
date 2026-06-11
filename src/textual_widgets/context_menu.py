@@ -111,6 +111,10 @@ class ContextMenuScreen(ModalScreen[str | None]):
         Binding("escape", "cancel", show=False),
     ]
 
+    # Harte Obergrenze fuer die Label-Breite (Zellen). Liegt unter der nutzbaren
+    # Breite (max-width 60 minus Border/Padding) -> Labels umbrechen nie.
+    _MAX_LABEL_WIDTH: ClassVar[int] = 50
+
     def __init__(
         self,
         items: list[ContextMenuItem],
@@ -131,11 +135,16 @@ class ContextMenuScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         """Baut die OptionList aus den Items auf, mit rechts-buendigen Shortcuts."""
-        # Maximale Breiten ermitteln, damit Shortcuts rechtsbuendig ausgerichtet werden
+        # Maximale Breiten ermitteln, damit Shortcuts rechtsbuendig ausgerichtet werden.
+        # Label-Breite hart cappen: zu lange Labels wuerden in der OptionList
+        # umbrechen (no_wrap am Rich-Text genuegt NICHT, OptionList umbricht
+        # selbst) -> Item belegt 2+ Zeilen -> _estimate_size (1 Zeile/Item)
+        # unterschaetzt die Hoehe -> Menue laeuft unten aus dem Bild. Durch
+        # physisches Kuerzen auf _MAX_LABEL_WIDTH ist Umbruch ausgeschlossen.
         visible = [i for i in self._items if not i.is_separator]
-        max_label = max(
-            (len(self._format_label(i)) for i in visible),
-            default=0,
+        max_label = min(
+            self._MAX_LABEL_WIDTH,
+            max((len(self._format_label(i)) for i in visible), default=0),
         )
         max_shortcut = max((len(i.shortcut) for i in visible), default=0)
 
@@ -146,11 +155,7 @@ class ContextMenuScreen(ModalScreen[str | None]):
                 options.append(None)
                 continue
 
-            label = self._format_label(item)
-            # Einzeilig erzwingen: lange Labels duerfen NICHT umbrechen, sonst
-            # belegt ein Item 2+ Zeilen und die Hoehenschaetzung in
-            # _estimate_size (1 Zeile/Item) unterschaetzt -> Menue laeuft unten
-            # aus dem Bild. Stattdessen am Rand mit Ellipsis kuerzen.
+            label = self._truncate(self._format_label(item), max_label)
             rich_label = Text(no_wrap=True, overflow="ellipsis")
             rich_label.append(label.ljust(max_label))
             if max_shortcut > 0:
@@ -161,6 +166,13 @@ class ContextMenuScreen(ModalScreen[str | None]):
 
         with Vertical():
             yield OptionList(*options, id="menu-options")
+
+    @staticmethod
+    def _truncate(text: str, max_len: int) -> str:
+        """Kuerzt einen Text auf max_len Zellen (mit Ellipsis), sonst unveraendert."""
+        if max_len <= 0 or len(text) <= max_len:
+            return text
+        return text[: max_len - 1] + "…"
 
     @staticmethod
     def _format_label(item: ContextMenuItem) -> str:
@@ -220,9 +232,9 @@ class ContextMenuScreen(ModalScreen[str | None]):
         sichtbar. Kein Reposition-Sprung in einem spaeteren Frame.
         """
         visible = [i for i in self._items if not i.is_separator]
-        max_label = max(
-            (len(self._format_label(i)) for i in visible),
-            default=0,
+        max_label = min(
+            self._MAX_LABEL_WIDTH,
+            max((len(self._format_label(i)) for i in visible), default=0),
         )
         max_shortcut = max((len(i.shortcut) for i in visible), default=0)
 

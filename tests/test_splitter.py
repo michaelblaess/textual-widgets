@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from textual.app import App, ComposeResult
+from textual.containers import Vertical
+from textual.widgets import Static
+
 from textual_widgets import HorizontalSplitter, VerticalSplitter
 from textual_widgets.splitter import _SplitterBase
 
@@ -67,6 +71,11 @@ class TestResizedMessage:
         assert msg.target_id == "left-pane"
         assert msg.size == 42
 
+    def test_subclass_message_carries_payload(self) -> None:
+        msg = HorizontalSplitter.Resized("file-table", 12)
+        assert msg.target_id == "file-table"
+        assert msg.size == 12
+
 
 class TestInheritance:
     def test_vertical_inherits_base(self) -> None:
@@ -75,7 +84,108 @@ class TestInheritance:
     def test_horizontal_inherits_base(self) -> None:
         assert issubclass(HorizontalSplitter, _SplitterBase)
 
-    def test_resized_message_shared(self) -> None:
-        """Beide Splitter teilen sich die gleiche Resized-Message."""
-        assert VerticalSplitter.Resized is _SplitterBase.Resized
-        assert HorizontalSplitter.Resized is _SplitterBase.Resized
+    def test_resized_message_is_subclass(self) -> None:
+        """Jeder Splitter redeklariert Resized als Subklasse der Basis-Message."""
+        assert issubclass(VerticalSplitter.Resized, _SplitterBase.Resized)
+        assert issubclass(HorizontalSplitter.Resized, _SplitterBase.Resized)
+
+
+class TestHandlerNames:
+    """Die Handler-Namen muessen orientierungsspezifisch sein — sonst feuern
+    die erwarteten ``on_horizontal_splitter_*`` / ``on_vertical_splitter_*``
+    Handler in den Consumer-Apps nie."""
+
+    def test_resized_handler_names(self) -> None:
+        assert VerticalSplitter.Resized.handler_name == "on_vertical_splitter_resized"
+        assert HorizontalSplitter.Resized.handler_name == "on_horizontal_splitter_resized"
+
+    def test_close_and_collapse_handler_names(self) -> None:
+        assert HorizontalSplitter.CloseRequested.handler_name == "on_horizontal_splitter_close_requested"
+        assert HorizontalSplitter.CollapseRequested.handler_name == "on_horizontal_splitter_collapse_requested"
+
+
+class TestTitleBar:
+    def test_plain_splitter_has_no_titlebar(self) -> None:
+        splitter = HorizontalSplitter()
+        assert splitter._has_titlebar() is False
+        assert splitter.has_class("-titled") is False
+
+    def test_title_enables_titlebar(self) -> None:
+        splitter = HorizontalSplitter(title="Log")
+        assert splitter._has_titlebar() is True
+        assert splitter.has_class("-titled") is True
+
+    def test_flags_enable_titlebar_without_title(self) -> None:
+        splitter = HorizontalSplitter(show_close=True)
+        assert splitter._has_titlebar() is True
+        assert splitter.has_class("-titled") is True
+
+    def test_collapse_message_payload(self) -> None:
+        msg = HorizontalSplitter.CollapseRequested(collapsed=True)
+        assert msg.collapsed is True
+
+    def test_set_collapsed_toggles_state(self) -> None:
+        splitter = HorizontalSplitter(title="Log", show_collapse=True)
+        assert splitter.collapsed is False
+        splitter.set_collapsed(True)
+        assert splitter.collapsed is True
+
+
+class _TitledApp(App[None]):
+    """App mit einem betitelten HorizontalSplitter ueber einem Target."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.events: list[object] = []
+
+    def compose(self) -> ComposeResult:
+        with Vertical():
+            yield Static("target", id="target")
+            yield HorizontalSplitter(
+                target_id="target",
+                title="Log",
+                show_collapse=True,
+                show_close=True,
+                id="sp",
+            )
+
+    def on_horizontal_splitter_close_requested(self, event: HorizontalSplitter.CloseRequested) -> None:
+        self.events.append("close")
+
+    def on_horizontal_splitter_collapse_requested(self, event: HorizontalSplitter.CollapseRequested) -> None:
+        self.events.append(("collapse", event.collapsed))
+
+
+class TestTitleBarInteraction:
+    async def test_render_populates_icon_regions(self) -> None:
+        async with _TitledApp().run_test(size=(60, 10)) as pilot:
+            sp = pilot.app.query_one("#sp", HorizontalSplitter)
+            actions = {action for _, _, action in sp._icon_regions}
+            assert actions == {"collapse", "close"}
+
+    async def test_click_close_posts_message(self) -> None:
+        app = _TitledApp()
+        async with app.run_test(size=(60, 10)) as pilot:
+            sp = pilot.app.query_one("#sp", HorizontalSplitter)
+            x0, x1, _ = next(r for r in sp._icon_regions if r[2] == "close")
+            await pilot.click("#sp", offset=((x0 + x1) // 2, 0))
+            await pilot.pause()
+            assert "close" in app.events
+
+    async def test_click_collapse_toggles_and_posts(self) -> None:
+        app = _TitledApp()
+        async with app.run_test(size=(60, 10)) as pilot:
+            sp = pilot.app.query_one("#sp", HorizontalSplitter)
+            x0, x1, _ = next(r for r in sp._icon_regions if r[2] == "collapse")
+            await pilot.click("#sp", offset=((x0 + x1) // 2, 0))
+            await pilot.pause()
+            assert sp.collapsed is True
+            assert ("collapse", True) in app.events
+
+    async def test_click_middle_does_not_post_icon_message(self) -> None:
+        """Klick in die Drag-Zone (Mitte) loest keine Icon-Aktion aus."""
+        app = _TitledApp()
+        async with app.run_test(size=(60, 10)) as pilot:
+            await pilot.click("#sp", offset=(20, 0))
+            await pilot.pause()
+            assert app.events == []

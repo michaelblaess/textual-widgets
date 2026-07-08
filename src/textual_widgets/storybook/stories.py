@@ -334,6 +334,18 @@ with Horizontal():
         yield Panel(id='top', classes='top-pane')    # height: 50%
         yield HorizontalSplitter(target_id='top', min_size=3)
         yield Panel(classes='bottom-pane')           # height: 1fr
+
+# Titled variant (VS-style title bar) - horizontal only:
+yield HorizontalSplitter(
+    target_id='top', min_size=2,
+    title='Log', show_collapse=True, show_close=True,
+)
+
+def on_horizontal_splitter_close_requested(self, event) -> None:
+    ...   # app decides what "close" means (hide panel + splitter)
+
+def on_horizontal_splitter_collapse_requested(self, event) -> None:
+    self.query_one('#log').set_class(event.collapsed, '-collapsed')
 """
 
 
@@ -374,6 +386,27 @@ class SplitterStory(Widget):
         border: round $primary;
         content-align: center middle;
     }
+    SplitterStory #sp-titled-demo {
+        layout: vertical;
+        height: 10;
+        margin-bottom: 1;
+    }
+    SplitterStory #sp-titled-top {
+        height: 1fr;
+        min-height: 2;
+        background: $surface-darken-1;
+        border: round $primary;
+        content-align: center middle;
+    }
+    SplitterStory #sp-titled-log {
+        height: 4;
+        min-height: 1;
+        background: $surface;
+        content-align: center middle;
+    }
+    SplitterStory #sp-titled-log.-collapsed {
+        display: none;
+    }
     """
 
     def compose(self) -> ComposeResult:
@@ -397,6 +430,28 @@ class SplitterStory(Widget):
                 id="sp-result",
                 classes="story-result",
             )
+            yield Static(
+                "Titled variant (Visual-Studio style): optional title on the "
+                "left, drag handle in the middle, collapse / close icons on the "
+                "right. Click the icons.",
+                classes="story-description",
+            )
+            with Container(id="sp-titled-demo"):
+                yield Static("Content panel\n(drag the title bar to resize)", id="sp-titled-top")
+                yield HorizontalSplitter(
+                    target_id="sp-titled-top",
+                    min_size=2,
+                    title="Log",
+                    show_collapse=True,
+                    show_close=True,
+                    id="sp-titled",
+                )
+                yield Static("Log panel body", id="sp-titled-log")
+            yield Static(
+                "Last title-bar action: —",
+                id="sp-titled-result",
+                classes="story-result",
+            )
             yield Static(_SPLITTER_CODE, markup=False, classes="story-code")
 
     def on_vertical_splitter_resized(
@@ -414,6 +469,24 @@ class SplitterStory(Widget):
     def _show_resize(self, target: str, size: int, axis: str) -> None:
         with contextlib.suppress(Exception):
             self.query_one("#sp-result", Static).update(f"Last resize: {target}.{axis} = {size} cells")
+
+    def on_horizontal_splitter_collapse_requested(
+        self,
+        event: HorizontalSplitter.CollapseRequested,
+    ) -> None:
+        with contextlib.suppress(Exception):
+            self.query_one("#sp-titled-log", Static).set_class(event.collapsed, "-collapsed")
+            state = "collapsed" if event.collapsed else "expanded"
+            self.query_one("#sp-titled-result", Static).update(f"Last title-bar action: {state}")
+
+    def on_horizontal_splitter_close_requested(
+        self,
+        event: HorizontalSplitter.CloseRequested,
+    ) -> None:
+        with contextlib.suppress(Exception):
+            self.query_one("#sp-titled-log", Static).display = False
+            self.query_one("#sp-titled", HorizontalSplitter).display = False
+            self.query_one("#sp-titled-result", Static).update("Last title-bar action: closed")
 
 
 # ----------------------------------------------------------------------

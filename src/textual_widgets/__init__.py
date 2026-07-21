@@ -8,6 +8,12 @@ from textual_widgets.clickable_links import ClickableLinksMixin
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.crash_guard import CrashGuard, ErrorScreen
 from textual_widgets.date_picker import CalendarGrid, DatePicker, DatePickerScreen
+from textual_widgets.disclaimer_screen import (
+    DISCLAIMER_VERSION,
+    DisclaimerScreen,
+    DisclaimerStore,
+    disclaimer_text,
+)
 from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
 from textual_widgets.http_status_screen import HttpStatusScreen
 from textual_widgets.info_header import InfoAction, InfoHeader, InfoItem
@@ -31,7 +37,11 @@ __all__ = [
     "ContextMenuScreen",
     "CrashGuard",
     "DatePicker",
+    "DISCLAIMER_VERSION",
     "DatePickerScreen",
+    "DisclaimerScreen",
+    "DisclaimerStore",
+    "disclaimer_text",
     "ErrorScreen",
     "HamburgerItem",
     "HamburgerMenu",

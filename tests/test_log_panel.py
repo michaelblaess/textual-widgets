@@ -60,6 +60,15 @@ class TestLogPanel:
             panel.clear_log()
             assert panel._lines == []
 
+    async def test_menu_clear_action_empties_log(self) -> None:
+        async with _LogApp().run_test() as pilot:
+            panel = pilot.app.query_one(LogPanel)
+            panel.write_log("a")
+            panel.write_log("b")
+            panel._on_menu_action("clear")
+            await pilot.pause()
+            assert panel._lines == []
+
     async def test_hide_show_toggle(self) -> None:
         async with _LogApp().run_test() as pilot:
             panel = pilot.app.query_one(LogPanel)

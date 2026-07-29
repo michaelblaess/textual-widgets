@@ -66,8 +66,10 @@ _PANEL_TEXT: dict[str, dict[str, str]] = {
     "de": {
         "copy": "Log kopieren",
         "export": "Log exportieren",
+        "clear": "Log leeren",
         "hide": "Log ausblenden",
         "copied": "Log in die Zwischenablage kopiert",
+        "cleared": "Log geleert",
         "empty": "Log ist leer",
         "exported": "Log gespeichert: {path}",
         "export_error": "Log-Export fehlgeschlagen: {error}",
@@ -75,8 +77,10 @@ _PANEL_TEXT: dict[str, dict[str, str]] = {
     "en": {
         "copy": "Copy log",
         "export": "Export log",
+        "clear": "Clear log",
         "hide": "Hide log",
         "copied": "Log copied to clipboard",
+        "cleared": "Log cleared",
         "empty": "Log is empty",
         "exported": "Log saved: {path}",
         "export_error": "Log export failed: {error}",
@@ -258,6 +262,7 @@ class LogPanel(RichLog):
         items = [
             ContextMenuItem("copy", self._t("copy")),
             ContextMenuItem("export", self._t("export")),
+            ContextMenuItem("clear", self._t("clear")),
             ContextMenuItem.separator(),
             ContextMenuItem("hide", self._t("hide")),
         ]
@@ -272,6 +277,11 @@ class LogPanel(RichLog):
             self.copy_log()
         elif action_id == "export":
             self.export_log()
+        elif action_id == "clear":
+            was_empty = not self._lines
+            self.clear_log()
+            self.app.notify(self._t("empty" if was_empty else "cleared"),
+                            severity="warning" if was_empty else "information")
         elif action_id == "hide":
             self.hide()
 

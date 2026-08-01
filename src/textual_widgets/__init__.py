@@ -1,6 +1,6 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.30.0"
+__version__ = "0.31.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.about_screen import AboutScreen, Quote, load_quotes
@@ -26,6 +26,12 @@ from textual_widgets.search_history_dropdown import (
 from textual_widgets.settings_screen import BaseSettingsScreen
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
 from textual_widgets.status_bar import StatusBar, StatusItem
+from textual_widgets.terminal_image import (
+    TerminalImage,
+    als_halbbloecke,
+    erkenne_protokoll,
+    vorab_initialisieren,
+)
 from textual_widgets.terminal_title import reset_terminal_title, set_terminal_title
 from textual_widgets.text_input_screen import TextInputScreen
 from textual_widgets.url_input_screen import UrlInputScreen
@@ -61,6 +67,10 @@ __all__ = [
     "SearchInputWithHistory",
     "StatusBar",
     "StatusItem",
+    "TerminalImage",
+    "als_halbbloecke",
+    "erkenne_protokoll",
+    "vorab_initialisieren",
     "TextInputScreen",
     "UrlInputScreen",
     "VerticalSplitter",

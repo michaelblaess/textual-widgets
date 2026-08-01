@@ -24,6 +24,7 @@ from textual_widgets.search_history_dropdown import (
 )
 from textual_widgets.settings_screen import BaseSettingsScreen
 from textual_widgets.splitter import HorizontalSplitter, VerticalSplitter
+from textual_widgets.status_bar import StatusBar, StatusItem
 from textual_widgets.terminal_title import reset_terminal_title, set_terminal_title
 from textual_widgets.text_input_screen import TextInputScreen
 from textual_widgets.url_input_screen import UrlInputScreen
@@ -56,6 +57,8 @@ __all__ = [
     "Quote",
     "SearchHistoryDropdown",
     "SearchInputWithHistory",
+    "StatusBar",
+    "StatusItem",
     "TextInputScreen",
     "UrlInputScreen",
     "VerticalSplitter",

@@ -1,9 +1,10 @@
 """Wiederverwendbare Textual-Widgets."""
 
-__version__ = "0.29.0"
+__version__ = "0.30.0"
 __author__ = "Michael Blaess"
 
 from textual_widgets.about_screen import AboutScreen, Quote, load_quotes
+from textual_widgets.clearable_input import ClearableInput
 from textual_widgets.clickable_links import ClickableLinksMixin
 from textual_widgets.context_menu import ContextMenuItem, ContextMenuScreen
 from textual_widgets.crash_guard import CrashGuard, ErrorScreen
@@ -33,6 +34,7 @@ __all__ = [
     "AboutScreen",
     "BaseSettingsScreen",
     "CalendarGrid",
+    "ClearableInput",
     "ClickableLinksMixin",
     "ContextMenuItem",
     "ContextMenuScreen",

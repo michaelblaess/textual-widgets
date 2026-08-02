@@ -161,6 +161,15 @@ class TerminalImage(Container):
         width: auto;
         height: auto;
     }
+    /* width: auto ist PFLICHT, nicht Geschmack: nur so leitet das
+       Grafik-Widget seine Breite aus Hoehe und Seitenverhaeltnis ab. Ohne die
+       Regel erbt es die volle Containerbreite, rechnet die Hoehe dazu passend
+       aus und rendert zu hoch - das Bild wird unten abgeschnitten, rechts
+       bleibt ein schwarzer Streifen. Genau so aufgetreten (02.08.2026). */
+    TerminalImage > .terminal-image-grafik {
+        width: auto;
+        height: 1fr;
+    }
     """
 
     def __init__(self, quelle: str | Path | bytes | None = None, *, modus: str = AUTO, **kwargs: Any) -> None:
@@ -220,6 +229,11 @@ class TerminalImage(Container):
                     return
         self._protokoll = None
 
+        # Zurueck auf Halbbloecke: ein zuvor eingehaengtes Grafik-Widget muss
+        # weg und der Platzhalter wieder sichtbar werden.
+        self.query("#bild-grafik").remove()
+        ziel.display = True
+
         breite = max(1, self.size.width - 2)
         hoehe = max(1, self.size.height - 1)
         zeilen = als_halbbloecke(self._daten, breite, hoehe)
@@ -236,11 +250,18 @@ class TerminalImage(Container):
 
             bild = Image.open(io.BytesIO(self._daten))
             self.query("#bild-grafik").remove()
-            self.query_one("#bild-inhalt", Static).update("")
+            # Den Platzhalter ausblenden statt nur zu leeren: ein leerer
+            # Static beansprucht sonst weiter eine Zeile und drueckt das Bild
+            # nach unten aus dem Rahmen.
+            platzhalter = self.query_one("#bild-inhalt", Static)
+            platzhalter.update("")
+            platzhalter.display = False
             # TGPImage und SixelImage nehmen ein Bild im Konstruktor, die
             # gemeinsame Oberklasse Widget nicht - der Typ ist hier bewusst
             # weiter als die tatsaechliche Signatur.
-            self.mount(klasse(bild, id="bild-grafik"))  # type: ignore[arg-type]
+            self.mount(
+                klasse(bild, id="bild-grafik", classes="terminal-image-grafik")  # type: ignore[arg-type]
+            )
             return True
         except Exception:  # noqa: BLE001 - dann eben Halbbloecke
             return False

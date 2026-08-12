@@ -32,6 +32,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from rich.errors import MarkupError
+from rich.markup import escape
 from rich.text import Text
 from textual.events import Click
 from textual.message import Message
@@ -203,7 +205,18 @@ class LogPanel(RichLog):
                 Log-Level. Unbekannte Werte werden wie 'info' behandelt.
         """
         timestamp = datetime.now().strftime("%H:%M:%S")
-        plain = Text.from_markup(text).plain
+        try:
+            plain = Text.from_markup(text).plain
+        except MarkupError:
+            # Der Aufrufer DARF Markup schicken (die klickbaren Links beruhen
+            # darauf), also wird es weiter ausgewertet. Kommt aber Fremdtext
+            # herein - die Fehlerausgabe eines Unterprozesses, ein Pfad, eine
+            # fremde Nachricht - dann steht darin irgendwann eine eckige
+            # Klammer, und die riss bisher die ganze App um. Ausgerechnet beim
+            # Protokollieren eines Fehlers. Woertlich anzeigen ist allemal
+            # besser als ein Absturz.
+            text = escape(text)
+            plain = text
         self._lines.append(f"{timestamp} {plain}")
 
         style = _LEVEL_STYLE.get(level, "")

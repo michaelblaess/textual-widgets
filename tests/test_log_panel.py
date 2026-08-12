@@ -107,3 +107,34 @@ class TestLogRouter:
             await pilot.pause()
             panel = pilot.app.query_one(LogPanel)
             assert any("from child" in line for line in panel._lines)
+
+
+class TestFremdtext:
+    """Fremdtext im Log darf die App nicht umbringen.
+
+    Das Panel wertet Markup bewusst aus - die klickbaren Links beruhen darauf.
+    Eine Fehlerausgabe aus einem Unterprozess ist aber Fremdtext, und eine
+    eckige Klammer darin riss bisher die ganze App um, ausgerechnet beim
+    Protokollieren eines Fehlers.
+    """
+
+    async def test_kaputtes_markup_landet_woertlich_im_log(self) -> None:
+        async with _LogApp().run_test() as pilot:
+            panel = pilot.app.query_one(LogPanel)
+
+            panel.write_log("Unterprozess: [/usage-Screenshot] fehlt", "error")
+            await pilot.pause()
+
+            assert any("[/usage-Screenshot]" in zeile for zeile in panel._lines)
+
+    async def test_gewolltes_markup_wirkt_weiter(self) -> None:
+        """Der Rueckfall darf die Auszeichnung nicht generell abschalten."""
+        async with _LogApp().run_test() as pilot:
+            panel = pilot.app.query_one(LogPanel)
+
+            panel.write_log("[bold]wichtig[/bold]", "info")
+            await pilot.pause()
+
+            # Im Klartext-Spiegel steht das Wort ohne die Auszeichnung -
+            # sie wurde also ausgewertet und nicht woertlich genommen.
+            assert any(zeile.endswith("wichtig") for zeile in panel._lines)

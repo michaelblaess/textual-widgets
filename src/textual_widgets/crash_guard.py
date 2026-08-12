@@ -159,9 +159,16 @@ class ErrorScreen(ModalScreen[None]):
         with Vertical():
             yield Static(self._t["title"], id="error-title")
             yield Static(self._t["apology"], id="error-apology")
-            yield Static(self._error_line, id="error-line")
+            # markup=False ist hier PFLICHT, nicht Geschmack: Fehlermeldung und
+            # Traceback sind Fremdtext. Ein Traceback enthaelt fast immer eckige
+            # Klammern (list[str], werte[0]), und rich liest darin einen
+            # Auszeichnungsbefehl. Bei einem MarkupError steht die kaputte
+            # Auszeichnung sogar in der Meldung selbst - dieser Dialog ist am
+            # 12.08.2026 genau daran ein zweites Mal gestorben und hat die
+            # Diagnose des ersten Fehlers mitgenommen ("1 of 2 errors shown").
+            yield Static(self._error_line, id="error-line", markup=False)
             with VerticalScroll(id="error-report"):
-                yield Static(self._report, id="error-report-text")
+                yield Static(self._report, id="error-report-text", markup=False)
             yield Static(self._t["hint"], id="error-hint")
             with Horizontal(id="error-buttons"):
                 yield Button(self._t["copy"], id="error-copy")

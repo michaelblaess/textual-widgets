@@ -37,6 +37,32 @@ class TestLoadQuotes:
             assert quote.text
             assert quote.author
 
+    def test_no_copyrighted_author_in_the_pool(self) -> None:
+        """Nur gemeinfreie Autoren - der Schutz endet 70 Jahre nach dem Tod (§ 64 UrhG).
+
+        Die Namen unten standen bis August 2026 im Pool und wurden entfernt.
+        Martin Luther King ist bis Ende 2038 geschuetzt, Schweitzer bis 2035,
+        Lewis bis 2033. Fowler und Rutan leben. Dieser Pool wird von jeder
+        TUI-Anwendung gelesen - ein Rueckfall hier trifft alle auf einmal.
+
+        Kanonische Quelle und Aufnahmeregeln:
+        claude-config/templates/zitate/
+        """
+        gesperrt = (
+            "martin luther king",
+            "albert schweitzer",
+            "c.s. lewis",
+            "corrie ten boom",
+            "martin fowler",
+            "burt rutan",
+            "sammy davis",
+        )
+        for sprache in ("de", "en"):
+            for quote in load_quotes(sprache):
+                autor = quote.author.casefold()
+                for name in gesperrt:
+                    assert name not in autor, f"{quote.author} ist nicht gemeinfrei ({sprache})"
+
 
 class TestAboutScreen:
     def _screen(self, **overrides: object) -> AboutScreen:

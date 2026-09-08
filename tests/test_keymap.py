@@ -13,6 +13,7 @@ from textual_widgets.keymap import (
     find_collisions,
     parse_overrides,
     resolve_keymap,
+    vim_navigation_bindings,
 )
 
 # Eine Beispielanwendung im Bestandsstil - bewusst nah an jira-timesheet.
@@ -255,3 +256,26 @@ def test_plattform_vorgabe(platform_name: str, erwartet: KeymapStyle) -> None:
 def test_bindung_ohne_taste_ist_ein_fehler() -> None:
     with pytest.raises(ValueError):
         KeyBinding(())
+
+
+# --- Vim-Bindungen fuers Widget --------------------------------------------------
+
+
+def test_vim_navigation_bindings_laesst_die_pfeiltasten_weg() -> None:
+    tasten = {key for key, _ in vim_navigation_bindings()}
+    assert tasten == {"j", "k", "h", "l", "g", "G", "ctrl+u", "ctrl+d"}
+
+
+def test_vim_navigation_bindings_zeigt_auf_die_aktionen_der_datatable() -> None:
+    # Alle Ziele muessen Aktionen sein, die Textuals DataTable von Haus aus hat.
+    aktionen = {action for _, action in vim_navigation_bindings()}
+    assert aktionen == {
+        "cursor_up",
+        "cursor_down",
+        "cursor_left",
+        "cursor_right",
+        "scroll_top",
+        "scroll_bottom",
+        "page_up",
+        "page_down",
+    }

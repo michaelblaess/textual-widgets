@@ -45,41 +45,221 @@ class _Code:
 # Kuratierte, praxisrelevante Codes (kein Exoten-Rauschen wie 418).
 _CODES: tuple[_Code, ...] = (
     # --- 2xx Erfolg ---
-    _Code(200, "Erfolg", "Success", "Anfrage erfolgreich, Inhalt wird geliefert.", "Request succeeded, content is returned."),
-    _Code(201, "Erfolg", "Success", "Erfolgreich - eine neue Ressource wurde angelegt.", "Succeeded - a new resource was created."),
-    _Code(202, "Angenommen", "Accepted", "Angenommen, aber noch nicht fertig verarbeitet.", "Accepted but not yet fully processed."),
+    _Code(
+        200,
+        "Erfolg",
+        "Success",
+        "Anfrage erfolgreich, Inhalt wird geliefert.",
+        "Request succeeded, content is returned.",
+    ),
+    _Code(
+        201,
+        "Erfolg",
+        "Success",
+        "Erfolgreich - eine neue Ressource wurde angelegt.",
+        "Succeeded - a new resource was created.",
+    ),
+    _Code(
+        202,
+        "Angenommen",
+        "Accepted",
+        "Angenommen, aber noch nicht fertig verarbeitet.",
+        "Accepted but not yet fully processed.",
+    ),
     _Code(204, "Erfolg", "Success", "Erfolgreich, aber kein Inhalt im Body.", "Succeeded, but no content in the body."),
-    _Code(206, "Teilantwort", "Partial", "Teilantwort (Range-Anfrage, z. B. Download/Streaming).", "Partial response (range request, e.g. download/streaming)."),
+    _Code(
+        206,
+        "Teilantwort",
+        "Partial",
+        "Teilantwort (Range-Anfrage, z. B. Download/Streaming).",
+        "Partial response (range request, e.g. download/streaming).",
+    ),
     # --- 3xx Weiterleitung ---
-    _Code(301, "Weiterleitung (dauerhaft)", "Redirect (permanent)", "Ressource dauerhaft unter neuer URL - Links aktualisieren.", "Resource permanently at a new URL - update links."),
-    _Code(302, "Weiterleitung (temporär)", "Redirect (temporary)", "Temporär woanders; Clients wechseln die Methode oft zu GET.", "Temporarily elsewhere; clients often switch the method to GET."),
-    _Code(303, "Weiterleitung", "Redirect", "Antwort per GET unter anderer URL holen (oft nach POST).", "Fetch the response via GET at another URL (often after POST)."),
-    _Code(304, "Cache (unverändert)", "Cache (unchanged)", "Unverändert seit letztem Abruf - der Client nutzt seinen Cache.", "Unchanged since last fetch - the client uses its cache."),
-    _Code(307, "Weiterleitung (temporär)", "Redirect (temporary)", "Temporär woanders; Methode und Body bleiben erhalten.", "Temporarily elsewhere; method and body are preserved."),
-    _Code(308, "Weiterleitung (dauerhaft)", "Redirect (permanent)", "Dauerhaft woanders; Methode und Body bleiben erhalten.", "Permanently elsewhere; method and body are preserved."),
+    _Code(
+        301,
+        "Weiterleitung (dauerhaft)",
+        "Redirect (permanent)",
+        "Ressource dauerhaft unter neuer URL - Links aktualisieren.",
+        "Resource permanently at a new URL - update links.",
+    ),
+    _Code(
+        302,
+        "Weiterleitung (temporär)",
+        "Redirect (temporary)",
+        "Temporär woanders; Clients wechseln die Methode oft zu GET.",
+        "Temporarily elsewhere; clients often switch the method to GET.",
+    ),
+    _Code(
+        303,
+        "Weiterleitung",
+        "Redirect",
+        "Antwort per GET unter anderer URL holen (oft nach POST).",
+        "Fetch the response via GET at another URL (often after POST).",
+    ),
+    _Code(
+        304,
+        "Cache (unverändert)",
+        "Cache (unchanged)",
+        "Unverändert seit letztem Abruf - der Client nutzt seinen Cache.",
+        "Unchanged since last fetch - the client uses its cache.",
+    ),
+    _Code(
+        307,
+        "Weiterleitung (temporär)",
+        "Redirect (temporary)",
+        "Temporär woanders; Methode und Body bleiben erhalten.",
+        "Temporarily elsewhere; method and body are preserved.",
+    ),
+    _Code(
+        308,
+        "Weiterleitung (dauerhaft)",
+        "Redirect (permanent)",
+        "Dauerhaft woanders; Methode und Body bleiben erhalten.",
+        "Permanently elsewhere; method and body are preserved.",
+    ),
     # --- 4xx Client-Fehler ---
-    _Code(400, "Client-Fehler", "Client error", "Ungültige Anfrage (z. B. fehlerhafte Syntax).", "Invalid request (e.g. malformed syntax)."),
-    _Code(401, "Anmeldung nötig", "Login required", "Authentifizierung fehlt oder ist ungültig.", "Authentication is missing or invalid."),
-    _Code(403, "Zugriff verweigert", "Access denied", "Server kennt die Anfrage, verweigert aber den Zugriff.", "Server understood the request but refuses access."),
-    _Code(404, "Nicht gefunden", "Not found", "Ressource existiert nicht (mehr) unter dieser URL.", "Resource does not (or no longer) exist at this URL."),
-    _Code(405, "Methode unzulässig", "Method not allowed", "HTTP-Methode für diese Ressource nicht erlaubt.", "HTTP method not allowed for this resource."),
-    _Code(408, "Timeout", "Timeout", "Server hat zu lange auf die Anfrage gewartet.", "Server timed out waiting for the request."),
-    _Code(409, "Konflikt", "Conflict", "Konflikt mit dem aktuellen Zustand der Ressource.", "Conflict with the current state of the resource."),
-    _Code(410, "Entfernt", "Gone", "Ressource dauerhaft entfernt (bewusst, anders als 404).", "Resource permanently removed (deliberate, unlike 404)."),
+    _Code(
+        400,
+        "Client-Fehler",
+        "Client error",
+        "Ungültige Anfrage (z. B. fehlerhafte Syntax).",
+        "Invalid request (e.g. malformed syntax).",
+    ),
+    _Code(
+        401,
+        "Anmeldung nötig",
+        "Login required",
+        "Authentifizierung fehlt oder ist ungültig.",
+        "Authentication is missing or invalid.",
+    ),
+    _Code(
+        403,
+        "Zugriff verweigert",
+        "Access denied",
+        "Server kennt die Anfrage, verweigert aber den Zugriff.",
+        "Server understood the request but refuses access.",
+    ),
+    _Code(
+        404,
+        "Nicht gefunden",
+        "Not found",
+        "Ressource existiert nicht (mehr) unter dieser URL.",
+        "Resource does not (or no longer) exist at this URL.",
+    ),
+    _Code(
+        405,
+        "Methode unzulässig",
+        "Method not allowed",
+        "HTTP-Methode für diese Ressource nicht erlaubt.",
+        "HTTP method not allowed for this resource.",
+    ),
+    _Code(
+        408,
+        "Timeout",
+        "Timeout",
+        "Server hat zu lange auf die Anfrage gewartet.",
+        "Server timed out waiting for the request.",
+    ),
+    _Code(
+        409,
+        "Konflikt",
+        "Conflict",
+        "Konflikt mit dem aktuellen Zustand der Ressource.",
+        "Conflict with the current state of the resource.",
+    ),
+    _Code(
+        410,
+        "Entfernt",
+        "Gone",
+        "Ressource dauerhaft entfernt (bewusst, anders als 404).",
+        "Resource permanently removed (deliberate, unlike 404).",
+    ),
     _Code(413, "Zu groß", "Too large", "Anfrage-Body ist zu groß.", "Request body is too large."),
-    _Code(415, "Format nicht unterstützt", "Unsupported type", "Format des Anfrage-Bodys wird nicht unterstützt.", "Request body media type is not supported."),
-    _Code(422, "Validierung fehlgeschlagen", "Validation failed", "Syntaktisch ok, aber inhaltlich nicht verarbeitbar.", "Syntactically ok but semantically invalid."),
-    _Code(429, "Rate-Limit", "Rate limit", "Zu viele Anfragen in kurzer Zeit - bitte drosseln.", "Too many requests in a short time - slow down."),
-    _Code(451, "Rechtlich gesperrt", "Legal block", "Aus rechtlichen Gründen nicht verfügbar.", "Unavailable for legal reasons."),
+    _Code(
+        415,
+        "Format nicht unterstützt",
+        "Unsupported type",
+        "Format des Anfrage-Bodys wird nicht unterstützt.",
+        "Request body media type is not supported.",
+    ),
+    _Code(
+        422,
+        "Validierung fehlgeschlagen",
+        "Validation failed",
+        "Syntaktisch ok, aber inhaltlich nicht verarbeitbar.",
+        "Syntactically ok but semantically invalid.",
+    ),
+    _Code(
+        429,
+        "Rate-Limit",
+        "Rate limit",
+        "Zu viele Anfragen in kurzer Zeit - bitte drosseln.",
+        "Too many requests in a short time - slow down.",
+    ),
+    _Code(
+        451,
+        "Rechtlich gesperrt",
+        "Legal block",
+        "Aus rechtlichen Gründen nicht verfügbar.",
+        "Unavailable for legal reasons.",
+    ),
     # --- 5xx Server-Fehler ---
-    _Code(500, "Server-Fehler", "Server error", "Unerwarteter interner Fehler auf dem Server.", "Unexpected internal error on the server."),
-    _Code(501, "Nicht implementiert", "Not implemented", "Server unterstützt die nötige Funktion nicht.", "Server does not support the required functionality."),
-    _Code(502, "Bad Gateway", "Bad gateway", "Vorgelagerter Server lieferte eine ungültige Antwort.", "Upstream server returned an invalid response."),
-    _Code(503, "Server-Fehler (temporär)", "Server error (temporary)", "Dienst momentan nicht verfügbar (Überlast/Wartung).", "Service temporarily unavailable (overload/maintenance)."),
-    _Code(504, "Gateway-Timeout", "Gateway timeout", "Vorgelagerter Server antwortete nicht rechtzeitig.", "Upstream server did not respond in time."),
-    _Code(505, "Version nicht unterstützt", "Version unsupported", "Die HTTP-Version wird nicht unterstützt.", "The HTTP version is not supported."),
-    _Code(507, "Speicher voll", "Insufficient storage", "Server hat nicht genug Speicher für die Anfrage.", "Server has insufficient storage for the request."),
-    _Code(511, "Anmeldung erforderlich", "Auth required", "Netzwerk verlangt Authentifizierung (Proxy/Captive Portal).", "Network requires authentication (proxy/captive portal)."),
+    _Code(
+        500,
+        "Server-Fehler",
+        "Server error",
+        "Unerwarteter interner Fehler auf dem Server.",
+        "Unexpected internal error on the server.",
+    ),
+    _Code(
+        501,
+        "Nicht implementiert",
+        "Not implemented",
+        "Server unterstützt die nötige Funktion nicht.",
+        "Server does not support the required functionality.",
+    ),
+    _Code(
+        502,
+        "Bad Gateway",
+        "Bad gateway",
+        "Vorgelagerter Server lieferte eine ungültige Antwort.",
+        "Upstream server returned an invalid response.",
+    ),
+    _Code(
+        503,
+        "Server-Fehler (temporär)",
+        "Server error (temporary)",
+        "Dienst momentan nicht verfügbar (Überlast/Wartung).",
+        "Service temporarily unavailable (overload/maintenance).",
+    ),
+    _Code(
+        504,
+        "Gateway-Timeout",
+        "Gateway timeout",
+        "Vorgelagerter Server antwortete nicht rechtzeitig.",
+        "Upstream server did not respond in time.",
+    ),
+    _Code(
+        505,
+        "Version nicht unterstützt",
+        "Version unsupported",
+        "Die HTTP-Version wird nicht unterstützt.",
+        "The HTTP version is not supported.",
+    ),
+    _Code(
+        507,
+        "Speicher voll",
+        "Insufficient storage",
+        "Server hat nicht genug Speicher für die Anfrage.",
+        "Server has insufficient storage for the request.",
+    ),
+    _Code(
+        511,
+        "Anmeldung erforderlich",
+        "Auth required",
+        "Netzwerk verlangt Authentifizierung (Proxy/Captive Portal).",
+        "Network requires authentication (proxy/captive portal).",
+    ),
 )
 
 # Farbe pro Statusklasse.
@@ -93,8 +273,20 @@ _GROUP_LABEL: dict[str, dict[int, str]] = {
 
 # Spaltenkoepfe und sonstige UI-Texte je Sprache.
 _TEXT: dict[str, dict[str, str]] = {
-    "de": {"title": "HTTP-Statuscodes", "col_code": "Code", "col_rating": "Bewertung", "col_expl": "Erklärung", "close": "Schließen"},
-    "en": {"title": "HTTP status codes", "col_code": "Code", "col_rating": "Rating", "col_expl": "Explanation", "close": "Close"},
+    "de": {
+        "title": "HTTP-Statuscodes",
+        "col_code": "Code",
+        "col_rating": "Bewertung",
+        "col_expl": "Erklärung",
+        "close": "Schließen",
+    },
+    "en": {
+        "title": "HTTP status codes",
+        "col_code": "Code",
+        "col_rating": "Rating",
+        "col_expl": "Explanation",
+        "close": "Close",
+    },
 }
 
 
@@ -192,7 +384,9 @@ class HttpStatusScreen(ModalScreen[None]):
                 renderables.append(Text(""))  # Leerzeile zwischen den Gruppen
             renderables.append(Text(_GROUP_LABEL[self._lang][cls], style=f"bold {style}"))
 
-            table: Table = Table(box=box.SIMPLE_HEAD, show_header=True, header_style="bold dim", pad_edge=False, expand=True)
+            table: Table = Table(
+                box=box.SIMPLE_HEAD, show_header=True, header_style="bold dim", pad_edge=False, expand=True
+            )
             table.add_column(self._txt("col_code"), justify="right", width=5, no_wrap=True)
             table.add_column(self._txt("col_rating"), width=28, no_wrap=True)
             table.add_column(self._txt("col_expl"), ratio=1)

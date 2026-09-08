@@ -30,6 +30,7 @@ from textual_widgets.keymap import (
     find_collisions,
     parse_overrides,
     resolve_keymap,
+    vim_navigation_bindings,
 )
 from textual_widgets.log_panel import LogMessage, LogPanel, LogRouter
 from textual_widgets.search_history_dropdown import (
@@ -100,5 +101,6 @@ __all__ = [
     "reset_terminal_title",
     "parse_overrides",
     "resolve_keymap",
+    "vim_navigation_bindings",
     "set_terminal_title",
 ]

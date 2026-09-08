@@ -293,8 +293,9 @@ class LogPanel(RichLog):
         elif action_id == "clear":
             was_empty = not self._lines
             self.clear_log()
-            self.app.notify(self._t("empty" if was_empty else "cleared"),
-                            severity="warning" if was_empty else "information")
+            self.app.notify(
+                self._t("empty" if was_empty else "cleared"), severity="warning" if was_empty else "information"
+            )
         elif action_id == "hide":
             self.hide()
 

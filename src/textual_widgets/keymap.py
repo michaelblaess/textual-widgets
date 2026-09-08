@@ -29,28 +29,34 @@ Public API:
     - `parse_overrides()` - Anwenderkorrekturen aus der Einstellungsdatei lesen.
     - `find_collisions()` - Doppelbelegungen einer fertigen Tabelle finden.
     - `default_style_for_platform()` - Startwert je Betriebssystem.
+    - `vim_navigation_bindings()` - die Vim-Ebene fuer ein Tabellen-Widget.
 
 Usage:
-    from textual_widgets import KeymapStyle, resolve_keymap
+    from textual_widgets import COMMON_FUNCTION_KEYS, KeyBinding, KeymapStyle, resolve_keymap
 
-    CLASSIC = {"quit": KeyBinding(("q", "Q")), "settings": KeyBinding(("s", "S"))}
+    CLASSIC = {"quit": KeyBinding(("q", "Q")), "show_settings": KeyBinding(("s", "S"))}
 
     resolved = resolve_keymap(
-        style=KeymapStyle.FUNCTION_KEYS,
-        classic=CLASSIC,
-        app_bindings=MY_APP_BINDINGS,
+        KeymapStyle.FUNCTION_KEYS,
+        CLASSIC,
+        function_keys=COMMON_FUNCTION_KEYS,
         overrides=user_overrides,
+        vim_navigation=True,
     )
     for problem in resolved.problems:
-        self.log_warning(problem.message)
+        self.write_log(problem.message)
     for action, binding in resolved.bindings.items():
         self._bindings.bind(
             ",".join(binding.keys),
             action,
-            t(f"binding.{action}"),
+            t(LABEL_KEYS[action]),
             key_display=binding.keys[0],
             show=binding.show,
         )
+
+    # Im Tabellen-Widget, in `_on_mount`:
+    for key, action in vim_navigation_bindings():
+        self._bindings.bind(key, action, show=False)
 
 Zwei Dinge, die beim Binden leicht Zeit kosten:
 
@@ -82,6 +88,7 @@ __all__ = [
     "find_collisions",
     "parse_overrides",
     "resolve_keymap",
+    "vim_navigation_bindings",
 ]
 
 
@@ -197,6 +204,34 @@ Wird am **Widget** gebunden, nicht an der App. Textual bringt davon nichts mit:
 `DataTable.BINDINGS` kennt in 8.2.8 nur `enter`, die Pfeiltasten, `pageup`,
 `pagedown`, `home`, `end`, `ctrl+home` und `ctrl+end`.
 """
+
+# Die Tasten, die Textual von sich aus schon auf dieselbe Aktion legt. Sie
+# stehen in VIM_NAVIGATION nur, damit die Tabelle vollstaendig ist - noch einmal
+# zu binden brauchte sie niemand.
+_ALREADY_IN_TEXTUAL: frozenset[str] = frozenset({"up", "down", "left", "right", "pageup", "pagedown"})
+
+
+def vim_navigation_bindings() -> tuple[tuple[str, str], ...]:
+    """Liefert die Bindungen der Vim-Ebene, die Textual nicht schon selbst hat.
+
+    Gedacht fuer den `_on_mount`-Haken eines Tabellen- oder Scroll-Widgets:
+
+        for key, action in vim_navigation_bindings():
+            self._bindings.bind(key, action, show=False)
+
+    Returns:
+        Paare aus Taste und Aktionsname, in der Reihenfolge von
+        `VIM_NAVIGATION`. Die Pfeiltasten und `pageup`/`pagedown` fehlen
+        bewusst - sie waeren eine Doppelbindung ohne Wirkung.
+    """
+
+    return tuple(
+        (key, action)
+        for action, binding in VIM_NAVIGATION.items()
+        for key in binding.keys
+        if key not in _ALREADY_IN_TEXTUAL
+    )
+
 
 PROTECTED_ACTIONS: frozenset[str] = frozenset({"quit"})
 """Aktionen, die niemals ohne Taste dastehen duerfen.

@@ -114,6 +114,10 @@ Vier Festlegungen, die man sonst nachschlagen muss:
 - **`quit` bekommt keine F-Taste.** `q` ist die einzige Taste, die in acht von
   acht Anwendungen dasselbe tut, und `F10` ist in console-error-scanner bereits
   belegt (häufigste Fehler). Auf dem Mac wäre `F10` ohnehin unsicher.
+  **`F10` bleibt damit offen:** `jira-timesheet` legt seit dem 08.09.2026 den
+  PDF-Export darauf, console-error-scanner die häufigsten Fehler. Innerhalb je
+  einer Anwendung kollidiert nichts, über die Familie hinweg bedeutet `F10`
+  zweierlei - zu entscheiden, wenn console-error-scanner an der Reihe ist.
 - **`F1`, `F3` und `F4` sind in keiner Anwendung belegt**, `F2` ist in
   buildrunner-tui bereits die Einstellungen. Die Konvention bestätigt also
   einen bestehenden Stand, statt einen neuen zu erfinden.

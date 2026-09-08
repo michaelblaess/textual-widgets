@@ -82,9 +82,22 @@ tritt **neben** den Buchstaben, sie ersetzt ihn nicht.
 | `F3` | `/` | Suchen / Filter | `focus_filter` |
 | `F4` | `alt+l` | Log ein/aus | `toggle_log` |
 | `F5` | - | Aktualisieren | `refresh` |
+| `F6` | `d` | Details | `show_details` |
 | - | `alt+h` | Historie | `show_history` |
 | - | `q` | Beenden | `quit` |
 | `Esc` | - | Dialog schließen | - |
+
+**Ab `F7` vergibt die Anwendung selbst.** Was dort sinnvoll liegt, hängt davon
+ab, was sie überhaupt kann - sie ergänzt ihre Einträge beim Aufruf von
+`resolve_keymap()`. `F11` und `F12` bleiben frei, viele Terminals und Browser
+belegen sie selbst mit Vollbild.
+
+**Der Footer sortiert nach F-Nummer.** `sort_for_footer()` zieht alles mit
+F-Taste nach vorn, aufsteigend, danach folgt der Rest unverändert. Ohne das
+stünde dort `F2 Settings` vor `F1 Info`, weil die Bestandstabelle die
+Reihenfolge vorgibt - das sieht aus wie ein Versehen. Im Bestandsstil wird
+**nicht** sortiert: dort hätte nur `refresh` eine F-Taste, und die allein nach
+vorn zu ziehen wäre eine Änderung ohne Gewinn.
 
 Vier Festlegungen, die man sonst nachschlagen muss:
 
@@ -111,10 +124,13 @@ Vier Festlegungen, die man sonst nachschlagen muss:
 | --- | --- |
 | `x` | Abbrechen |
 | `c` | Kopieren |
-| `d` | Details |
 | `e` | Exportieren |
 | offen | Start (Scan, Crawl, Build, Abruf) |
 | offen | `c` gegen "Scan starten" - der ungelöste Zweitkonflikt |
+
+`d` (Details) ist aus dieser Liste in die gemeinsame Konvention gewandert: Es
+macht in 5 von 8 Anwendungen etwas mit Details oder einem Diff und ist damit
+die einzige fachliche Taste, die einheitlich genug dafür ist.
 
 ## Die Vim-Ebene
 
@@ -225,19 +241,23 @@ Berechnet über `resolve_keymap()` gegen den heutigen Stand aus `app.py`:
 
 | Aktion | klassisch | F-Tasten |
 | --- | --- | --- |
-| Einstellungen | `s` `S` | **`F2`** `s` `S` |
 | Info / Über | `i` `I` | **`F1`** `i` `I` |
+| Einstellungen | `s` `S` | **`F2`** `s` `S` |
 | Filter | `/` | **`F3`** `/` |
 | Log ein/aus | `l` `L` | **`F4`** `alt+l` |
-| alles andere | unverändert | unverändert |
+| Aktualisieren | `F5` | `F5` |
+| Details | `d` `D` | **`F6`** `d` `D` |
+| Analyse | `b` `B` | **`F7`** `b` `B` |
+| Manuelle Erfassung | `m` `M` | **`F8`** `m` `M` |
+| Excel-Export | `e` `E` | **`F9`** `e` `E` |
+| PDF-Export | `p` `P` | **`F10`** `p` `P` |
 
-Unverändert bleiben: `q` Beenden, `e` Excel, `p` PDF, `d` Details, `c` Log
-kopieren, `TAB` Ansicht wechseln, `b` Analyse, `F5` Aktualisieren, `a`
-Anonymisieren, `r` Cache zurücksetzen, `t` Theme, `m` manuelle Erfassung,
-`DEL` löschen, `,` und `.` Monatswechsel.
+Unverändert bleiben: `q` Beenden, `c` Log kopieren, `TAB` Ansicht wechseln,
+`a` Anonymisieren, `r` Cache zurücksetzen, `t` Theme, `DEL` löschen, `,` und
+`.` Monatswechsel, `?` Übersicht.
 
-**Drei der vier Änderungen nehmen nichts weg** - `F1`, `F2` und `F3` treten
-neben die vorhandenen Buchstaben. Die einzige echte Umgewöhnung ist das Log.
+**Nur eine der Änderungen nimmt etwas weg** - alle F-Tasten treten neben die
+vorhandenen Buchstaben. Die einzige echte Umgewöhnung ist das Log.
 
 Mit eingeschalteter Vim-Navigation meldet der Prüfer:
 

@@ -18,6 +18,19 @@ from textual_widgets.disclaimer_screen import (
 from textual_widgets.hamburger_menu import HamburgerItem, HamburgerMenu
 from textual_widgets.http_status_screen import HttpStatusScreen
 from textual_widgets.info_header import InfoAction, InfoHeader, InfoItem
+from textual_widgets.keymap import (
+    COMMON_FUNCTION_KEYS,
+    PROTECTED_ACTIONS,
+    VIM_NAVIGATION,
+    KeyBinding,
+    KeymapProblem,
+    KeymapStyle,
+    ResolvedKeymap,
+    default_style_for_platform,
+    find_collisions,
+    parse_overrides,
+    resolve_keymap,
+)
 from textual_widgets.log_panel import LogMessage, LogPanel, LogRouter
 from textual_widgets.search_history_dropdown import (
     SearchHistoryDropdown,
@@ -45,6 +58,7 @@ __all__ = [
     "ContextMenuItem",
     "ContextMenuScreen",
     "CrashGuard",
+    "COMMON_FUNCTION_KEYS",
     "DatePicker",
     "DISCLAIMER_VERSION",
     "DatePickerScreen",
@@ -59,15 +73,21 @@ __all__ = [
     "InfoAction",
     "InfoHeader",
     "InfoItem",
+    "KeyBinding",
+    "KeymapProblem",
+    "KeymapStyle",
     "LogMessage",
     "LogPanel",
     "LogRouter",
     "Quote",
+    "PROTECTED_ACTIONS",
+    "ResolvedKeymap",
     "SearchHistoryDropdown",
     "SearchInputWithHistory",
     "StatusBar",
     "StatusItem",
     "TerminalImage",
+    "VIM_NAVIGATION",
     "als_halbbloecke",
     "erkenne_protokoll",
     "vorab_initialisieren",
@@ -75,6 +95,10 @@ __all__ = [
     "UrlInputScreen",
     "VerticalSplitter",
     "load_quotes",
+    "default_style_for_platform",
+    "find_collisions",
     "reset_terminal_title",
+    "parse_overrides",
+    "resolve_keymap",
     "set_terminal_title",
 ]

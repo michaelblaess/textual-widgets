@@ -146,23 +146,39 @@ class ResolvedKeymap:
 
 
 COMMON_FUNCTION_KEYS: Mapping[str, KeyBinding] = {
-    "about": KeyBinding(("f1", "i", "I")),
-    "settings": KeyBinding(("f2",)),
-    "search": KeyBinding(("f3", "slash"), show=False),
-    "log": KeyBinding(("f4", "alt+l")),
+    "show_about": KeyBinding(("f1", "i", "I")),
+    "show_settings": KeyBinding(("f2", "s", "S")),
+    "focus_filter": KeyBinding(("f3", "slash"), show=False),
+    "toggle_log": KeyBinding(("f4", "alt+l")),
     "refresh": KeyBinding(("f5",)),
-    "quit": KeyBinding(("f10", "q", "Q")),
+    "show_history": KeyBinding(("alt+h",)),
+    "quit": KeyBinding(("q", "Q")),
 }
 """Die anwendungsuebergreifende Konvention aus `SHORTCUTS.md`.
 
-`settings` bekommt bewusst **keinen** Buchstaben als Zweitbelegung: Der ganze
-Zweck der Umstellung ist, dass `s` fuer "Start" frei wird. `log` zieht von `l`
-weg, weil `l` in der Vim-Ebene "nach rechts" ist und eine Widget-Bindung die
-der App verdeckt.
+Die Schluessel sind die **tatsaechlichen** Aktionsnamen aus dem Bestand, nicht
+neu erfundene: `show_about` steht in 7 von 8 Anwendungen so da, `toggle_log`
+ebenfalls in 7, `show_history` in 6, `show_settings` und `focus_filter` in 5.
+Deshalb muss keine Anwendung eine Aktion umbenennen, um die Konvention zu
+uebernehmen (erhoben am 08.09.2026 mit `tools/keymap_survey.py`).
 
-Nicht enthalten sind die fachlichen Tasten (`s` Start, `x` Abbrechen, `c`
-Kopieren, `e` Exportieren, `d` Details) - die haengen daran, was die jeweilige
-Anwendung ueberhaupt kann, und stehen deshalb in ihrer eigenen Tabelle.
+Vier Festlegungen, die man sonst nachschlagen muss:
+
+- `show_settings` behaelt `s` als Zweitbelegung. Die F-Taste tritt daneben, sie
+  ersetzt den Buchstaben nicht. Folge davon: `s` ist **nicht** frei fuer
+  "Start" - die Anwendungen mit einem Lauf brauchen dafuer eine andere Taste.
+  Offen, welche.
+- `toggle_log` zieht von `l` weg, weil `l` in der Vim-Ebene "nach rechts" ist
+  und eine Widget-Bindung die der App verdeckt.
+- `show_history` zieht aus demselben Grund von `h` weg. `ctrl+h` kommt in
+  Textual nicht an, `alt+h` schon.
+- `quit` bekommt **keine** F-Taste. `q` ist die einzige Taste, die in acht von
+  acht Anwendungen dasselbe tut, und `f10` ist in console-error-scanner bereits
+  belegt (haeufigste Fehler). Auf dem Mac waere f10 ohnehin unsicher.
+
+Nicht enthalten sind die fachlichen Tasten (`x` Abbrechen, `c` Kopieren,
+`e` Exportieren, `d` Details) - die haengen daran, was die jeweilige Anwendung
+ueberhaupt kann, und stehen deshalb in ihrer eigenen Tabelle.
 """
 
 VIM_NAVIGATION: Mapping[str, KeyBinding] = {

@@ -279,3 +279,13 @@ def test_vim_navigation_bindings_zeigt_auf_die_aktionen_der_datatable() -> None:
         "page_up",
         "page_down",
     }
+
+
+def test_plattform_wird_erst_beim_aufruf_gelesen(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Gegenprobe zur eingefrorenen Vorgabe: stuende sys.platform als
+    # Default im Funktionskopf, waere er beim Import ausgewertet und dieser
+    # monkeypatch wirkungslos - der Test waere gruen, ohne etwas zu pruefen.
+    monkeypatch.setattr("textual_widgets.keymap.sys.platform", "darwin")
+    assert default_style_for_platform() is KeymapStyle.CLASSIC
+    monkeypatch.setattr("textual_widgets.keymap.sys.platform", "win32")
+    assert default_style_for_platform() is KeymapStyle.FUNCTION_KEYS

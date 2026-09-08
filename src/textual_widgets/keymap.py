@@ -241,7 +241,7 @@ uebernommen - sonst haengt die Anwendung ohne sichtbaren Ausweg.
 """
 
 
-def default_style_for_platform(platform_name: str = sys.platform) -> KeymapStyle:
+def default_style_for_platform(platform_name: str | None = None) -> KeymapStyle:
     """Ermittelt den Stil, mit dem eine frische Installation starten sollte.
 
     Auf macOS senden die F-Tasten ab Werk Systemfunktionen, und F3, F4 und F11
@@ -249,14 +249,20 @@ def default_style_for_platform(platform_name: str = sys.platform) -> KeymapStyle
     Dort ist der Bestandsstil die freundlichere Vorgabe. Umschalten kann der
     Anwender ueberall.
 
+    `sys.platform` wird BEWUSST erst im Rumpf gelesen und nicht als
+    Vorgabewert im Kopf: Ein Vorgabewert wird beim Import ausgewertet und ist
+    danach eingefroren - ein spaeterer `monkeypatch` bliebe wirkungslos, und
+    der Test dazu waere gruen, ohne etwas zu pruefen.
+
     Args:
-        platform_name: Der zu pruefende Plattformname, per Vorgabe `sys.platform`.
+        platform_name: Der zu pruefende Plattformname. None liest `sys.platform`.
 
     Returns:
         Der vorzuschlagende Stil.
     """
 
-    return KeymapStyle.CLASSIC if platform_name == "darwin" else KeymapStyle.FUNCTION_KEYS
+    aktuell = sys.platform if platform_name is None else platform_name
+    return KeymapStyle.CLASSIC if aktuell == "darwin" else KeymapStyle.FUNCTION_KEYS
 
 
 def find_collisions(bindings: Mapping[str, KeyBinding]) -> tuple[KeymapProblem, ...]:

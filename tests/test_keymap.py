@@ -11,8 +11,10 @@ from textual_widgets.keymap import (
     KeymapStyle,
     default_style_for_platform,
     find_collisions,
+    function_key_number,
     parse_overrides,
     resolve_keymap,
+    sort_for_footer,
     vim_navigation_bindings,
 )
 
@@ -289,3 +291,51 @@ def test_plattform_wird_erst_beim_aufruf_gelesen(monkeypatch: pytest.MonkeyPatch
     assert default_style_for_platform() is KeymapStyle.CLASSIC
     monkeypatch.setattr("textual_widgets.keymap.sys.platform", "win32")
     assert default_style_for_platform() is KeymapStyle.FUNCTION_KEYS
+
+
+# --- Footer-Reihenfolge ---------------------------------------------------------
+
+
+def test_footer_sortiert_die_f_tasten_aufsteigend() -> None:
+    # Ohne Sortierung stuende F2 vor F1, weil die Bestandstabelle die
+    # Reihenfolge vorgibt - im Footer sieht das aus wie ein Versehen.
+    durcheinander = {
+        "show_settings": KeyBinding(("f2", "s")),
+        "quit": KeyBinding(("q",)),
+        "show_about": KeyBinding(("f1", "i")),
+        "refresh": KeyBinding(("f5",)),
+        "export_excel": KeyBinding(("e",)),
+        "show_details": KeyBinding(("f6", "d")),
+    }
+    assert list(sort_for_footer(durcheinander)) == [
+        "show_about",
+        "show_settings",
+        "refresh",
+        "show_details",
+        "quit",
+        "export_excel",
+    ]
+
+
+def test_footer_laesst_die_reihenfolge_ohne_f_tasten_in_ruhe() -> None:
+    ohne = {"quit": KeyBinding(("q",)), "export_excel": KeyBinding(("e",)), "copy_log": KeyBinding(("c",))}
+    assert list(sort_for_footer(ohne)) == ["quit", "export_excel", "copy_log"]
+
+
+def test_footer_verliert_keine_aktion() -> None:
+    sortiert = sort_for_footer(COMMON_FUNCTION_KEYS)
+    assert set(sortiert) == set(COMMON_FUNCTION_KEYS)
+
+
+def test_f_tasten_nummer_findet_die_taste_an_jeder_stelle() -> None:
+    assert function_key_number(KeyBinding(("f1", "i"))) == 1
+    assert function_key_number(KeyBinding(("i", "f12"))) == 12
+    assert function_key_number(KeyBinding(("q", "Q"))) is None
+    # Keine Falschtreffer auf aehnlich aussehende Tastennamen.
+    assert function_key_number(KeyBinding(("full_stop",))) is None
+    assert function_key_number(KeyBinding(("f13",))) is None
+
+
+def test_gemeinsame_konvention_hat_eine_luecken_lose_f_reihe() -> None:
+    nummern = sorted(n for b in COMMON_FUNCTION_KEYS.values() if (n := function_key_number(b)) is not None)
+    assert nummern == list(range(1, len(nummern) + 1)), f"Luecke in der F-Reihe: {nummern}"

@@ -30,6 +30,7 @@ Public API:
     - `find_collisions()` - Doppelbelegungen einer fertigen Tabelle finden.
     - `default_style_for_platform()` - Startwert je Betriebssystem.
     - `vim_navigation_bindings()` - die Vim-Ebene fuer ein Tabellen-Widget.
+    - `sort_for_footer()` - die Belegung nach F-Tasten-Nummer ordnen.
 
 Usage:
     from textual_widgets import COMMON_FUNCTION_KEYS, KeyBinding, KeymapStyle, resolve_keymap
@@ -87,7 +88,9 @@ __all__ = [
     "default_style_for_platform",
     "find_collisions",
     "parse_overrides",
+    "function_key_number",
     "resolve_keymap",
+    "sort_for_footer",
     "vim_navigation_bindings",
 ]
 
@@ -158,6 +161,7 @@ COMMON_FUNCTION_KEYS: Mapping[str, KeyBinding] = {
     "focus_filter": KeyBinding(("f3", "slash"), show=False),
     "toggle_log": KeyBinding(("f4", "alt+l")),
     "refresh": KeyBinding(("f5",)),
+    "show_details": KeyBinding(("f6", "d", "D")),
     "show_history": KeyBinding(("alt+h",)),
     "quit": KeyBinding(("q", "Q")),
 }
@@ -183,9 +187,17 @@ Vier Festlegungen, die man sonst nachschlagen muss:
   acht Anwendungen dasselbe tut, und `f10` ist in console-error-scanner bereits
   belegt (haeufigste Fehler). Auf dem Mac waere f10 ohnehin unsicher.
 
-Nicht enthalten sind die fachlichen Tasten (`x` Abbrechen, `c` Kopieren,
-`e` Exportieren, `d` Details) - die haengen daran, was die jeweilige Anwendung
-ueberhaupt kann, und stehen deshalb in ihrer eigenen Tabelle.
+`show_details` bekommt `f6`, weil `d` in 5 von 8 Anwendungen etwas mit Details
+oder einem Diff macht - das ist die einzige fachliche Taste, die einheitlich
+genug fuer die gemeinsame Tabelle ist.
+
+**Ab `f7` gehoert die Vergabe der Anwendung.** Was dort sinnvoll liegt, haengt
+davon ab, was sie ueberhaupt kann. Sie ergaenzt ihre eigenen Eintraege beim
+Aufruf von `resolve_keymap()`. `f11` und `f12` besser meiden - viele Terminals
+und Browser belegen sie selbst (Vollbild).
+
+Nicht enthalten sind die uebrigen fachlichen Tasten (`x` Abbrechen,
+`c` Kopieren, `e` Exportieren) - dieselbe Begruendung.
 """
 
 VIM_NAVIGATION: Mapping[str, KeyBinding] = {
@@ -209,6 +221,51 @@ Wird am **Widget** gebunden, nicht an der App. Textual bringt davon nichts mit:
 # stehen in VIM_NAVIGATION nur, damit die Tabelle vollstaendig ist - noch einmal
 # zu binden brauchte sie niemand.
 _ALREADY_IN_TEXTUAL: frozenset[str] = frozenset({"up", "down", "left", "right", "pageup", "pagedown"})
+
+
+def function_key_number(binding: KeyBinding) -> int | None:
+    """Liefert die Nummer der F-Taste einer Bindung, falls sie eine hat.
+
+    Args:
+        binding: Die zu pruefende Bindung.
+
+    Returns:
+        Die Zahl aus `f1` bis `f12`, sonst None. Gesucht wird ueber alle Tasten
+        der Bindung, nicht nur die erste - eine Anwenderkorrektur kann die
+        F-Taste an eine andere Stelle der Liste schieben.
+    """
+
+    for key in binding.keys:
+        if len(key) in (2, 3) and key[0] == "f" and key[1:].isdigit():
+            nummer = int(key[1:])
+            if 1 <= nummer <= 12:
+                return nummer
+    return None
+
+
+def sort_for_footer(bindings: Mapping[str, KeyBinding]) -> dict[str, KeyBinding]:
+    """Bringt die Belegung in die Reihenfolge, in der sie im Footer stehen soll.
+
+    Zuerst alles mit F-Taste, nach ihrer Nummer aufsteigend - `F1` vor `F2` vor
+    `F3`. Ohne das steht dort die Reihenfolge der Bestandstabelle, und `F2` kommt
+    vor `F1`, was im Footer aussieht wie ein Versehen.
+
+    Danach folgen die Aktionen ohne F-Taste in unveraenderter Reihenfolge. Im
+    Bestandsstil hat keine Aktion eine F-Taste ausser `refresh`, dort aendert
+    sich also fast nichts.
+
+    Args:
+        bindings: Die aufgeloeste Belegung.
+
+    Returns:
+        Dieselben Eintraege in der Footer-Reihenfolge.
+    """
+
+    mit_f = [(function_key_number(b), a) for a, b in bindings.items() if function_key_number(b) is not None]
+    mit_f.sort(key=lambda paar: paar[0] or 0)
+    sortiert = {action: bindings[action] for _, action in mit_f}
+    sortiert.update({a: b for a, b in bindings.items() if a not in sortiert})
+    return sortiert
 
 
 def vim_navigation_bindings() -> tuple[tuple[str, str], ...]:

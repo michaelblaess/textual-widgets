@@ -28,8 +28,10 @@ from textual_widgets.keymap import (
     ResolvedKeymap,
     default_style_for_platform,
     find_collisions,
+    function_key_number,
     parse_overrides,
     resolve_keymap,
+    sort_for_footer,
     vim_navigation_bindings,
 )
 from textual_widgets.log_panel import LogMessage, LogPanel, LogRouter
@@ -100,7 +102,9 @@ __all__ = [
     "find_collisions",
     "reset_terminal_title",
     "parse_overrides",
+    "function_key_number",
     "resolve_keymap",
+    "sort_for_footer",
     "vim_navigation_bindings",
     "set_terminal_title",
 ]

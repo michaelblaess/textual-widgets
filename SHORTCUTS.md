@@ -253,9 +253,10 @@ der Tasten `h`, `j`, `k` oder `g` benutzt.
 - [x] `textual_widgets/keymap.py` - Stile, Vim-Ebene, Zusammenführen, Prüfer.
 - [x] `tests/test_keymap.py` - 30 Tests, gegengeprüft per Mutation.
 - [x] `tools/keymap_survey.py` - die Erhebung, wiederholbar nach jeder Umstellung.
-- [ ] `jira-timesheet` auf die Schleife umstellen, Schalter in die
-      Einstellungen, Vim-Ebene an die Tabellen.
-- [ ] Übersichtsseite mit der aktuellen Belegung (fällt aus der Tabelle ab).
+- [x] `jira-timesheet` umgestellt (v1.21.0+, Commit `beabcda`): Schleife statt
+      19 Einzelbindungen, Schalter unter Einstellungen -> Tastatur, Vim-Ebene
+      an `ResizableDataTable`, eigene Belegungen über `keymap_custom`.
+- [x] Übersichtsseite auf `?`, die die aufgelöste Belegung zeigt.
 - [ ] Die übrigen drei `textual-widgets`-Anwendungen nachziehen
       (c2pa-scanner, console-error-scanner, sitemap-tracker).
 - [ ] Die vier ohne diese Abhängigkeit - offen, ob sie die Bibliothek bekommen

@@ -7,6 +7,10 @@
 
 ---
 
+<p align="center">
+  <img src="docs/banner.jpg" alt="textual-widgets - terminal interface components as building blocks" width="100%">
+</p>
+
 [![Stars](https://img.shields.io/github/stars/michaelblaess/textual-widgets?logo=github&logoColor=white&color=fbbf24)](https://github.com/michaelblaess/textual-widgets/stargazers)
 [![Forks](https://img.shields.io/github/forks/michaelblaess/textual-widgets?logo=github&logoColor=white&color=34d399)](https://github.com/michaelblaess/textual-widgets/network/members)
 [![Issues](https://img.shields.io/github/issues/michaelblaess/textual-widgets?logo=github&logoColor=white&color=f87171)](https://github.com/michaelblaess/textual-widgets/issues)

@@ -136,9 +136,15 @@ class BaseSettingsScreen(ModalScreen[dict[str, object] | None]):
         SETTINGS_TITLE:
             Optionaler fester Titel. Leer = sprachabhaengiger Default
             ("Einstellungen" / "Settings").
+        SHOW_LANGUAGE_TAB:
+            Ob der Sprach-Tab erscheint. Standard True. Eine App, deren
+            Oberflaeche nur eine Sprache kennt oder die den Schluessel
+            "language" fuer etwas anderes braucht, schaltet ihn ab - dann
+            bleibt "language" im Ergebnis unangetastet.
     """
 
     SETTINGS_TITLE: str = ""
+    SHOW_LANGUAGE_TAB: bool = True
 
     DEFAULT_CSS = """
     BaseSettingsScreen {
@@ -251,7 +257,8 @@ class BaseSettingsScreen(ModalScreen[dict[str, object] | None]):
             title = self.SETTINGS_TITLE or self._t("title")
             yield Static(title, id="settings-title")
             with TabbedContent():
-                yield from self._language_tab()
+                if self.SHOW_LANGUAGE_TAB:
+                    yield from self._language_tab()
                 yield from self.app_tabs()
                 yield from self._storage_tab()
             with Horizontal(id="settings-buttons"):
@@ -327,9 +334,10 @@ class BaseSettingsScreen(ModalScreen[dict[str, object] | None]):
         """Sammelt alle Werte ein, postet ein LogMessage und schliesst."""
         result = dict(self._settings)
 
-        lang_value = self.query_one("#settings-language", Select).value
-        if isinstance(lang_value, str):
-            result["language"] = lang_value
+        if self.SHOW_LANGUAGE_TAB:
+            lang_value = self.query_one("#settings-language", Select).value
+            if isinstance(lang_value, str):
+                result["language"] = lang_value
 
         self.collect_app_settings(result)
         # Direkt an die App posten (nicht self.post_message): der Screen wird

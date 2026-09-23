@@ -127,3 +127,26 @@ class TestStorageTab:
             app.push_screen(screen)
             await pilot.pause()
             assert len(screen.query("#settings-tab-storage")) == 0
+
+
+class _OhneSprache(_DemoSettings):
+    """App, deren Oberflaeche nur eine Sprache kennt."""
+
+    SHOW_LANGUAGE_TAB = False
+
+
+class TestOhneSprachTab:
+    async def test_kein_sprach_tab_und_language_bleibt(self) -> None:
+        app = _SettingsApp()
+        result: list[dict[str, object] | None] = []
+        async with app.run_test() as pilot:
+            # "language" traegt hier etwas anderes als die Oberflaechensprache.
+            app.push_screen(_OhneSprache({"language": "de"}, lang="en"), callback=result.append)
+            await pilot.pause()
+            assert not app.screen.query("#settings-language")
+            assert app.screen.query_one("#tab-demo", TabPane)
+            await pilot.press("ctrl+s")
+            await pilot.pause()
+        assert result and result[0] is not None
+        assert result[0]["language"] == "de"
+        assert result[0]["feature_x"] is False

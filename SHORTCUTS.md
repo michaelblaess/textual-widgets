@@ -118,6 +118,8 @@ Vier Festlegungen, die man sonst nachschlagen muss:
   PDF-Export darauf, console-error-scanner die häufigsten Fehler. Innerhalb je
   einer Anwendung kollidiert nichts, über die Familie hinweg bedeutet `F10`
   zweierlei - zu entscheiden, wenn console-error-scanner an der Reihe ist.
+  Seit 24.09.2026 kommt eine dritte Bedeutung dazu: codename-generator legt
+  die Sprache der Namen auf `F10`.
 - **`F1`, `F3` und `F4` sind in keiner Anwendung belegt**, `F2` ist in
   buildrunner-tui bereits die Einstellungen. Die Konvention bestätigt also
   einen bestehenden Stand, statt einen neuen zu erfinden.
@@ -281,6 +283,14 @@ der Tasten `h`, `j`, `k` oder `g` benutzt.
       19 Einzelbindungen, Schalter unter Einstellungen -> Tastatur, Vim-Ebene
       an `ResizableDataTable`, eigene Belegungen über `keymap_custom`.
 - [x] Übersichtsseite auf `?`, die die aufgelöste Belegung zeigt.
+- [x] `codename-generator` umgestellt (Commit `11a7200`, textual-widgets
+      v0.32.0). Dort galt vorher `i` als "eigenes Wort" und `a` als Info -
+      jetzt `i` Info, `o` eigenes Wort, `s` Einstellungen (neu, auf
+      `BaseSettingsScreen` mit `SHOW_LANGUAGE_TAB = False`, weil `language`
+      dort die Namenssprache ist). `k` (Zusatz halten) zog auf `m`, weil `k`
+      eine Vim-Taste ist. Im Vim-Modus bleibt nur `l` (Sprache) verdeckt, `F10`
+      ersetzt es. F-Reihe: F1 Info, F2 Einstellungen, F5 neu würfeln, F7 eigenes
+      Wort, F8 Wort halten, F9 Zusatz halten, F10 Sprache.
 - [ ] Die übrigen drei `textual-widgets`-Anwendungen nachziehen
       (c2pa-scanner, console-error-scanner, sitemap-tracker).
 - [ ] Die vier ohne diese Abhängigkeit - offen, ob sie die Bibliothek bekommen

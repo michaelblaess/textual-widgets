@@ -1,12 +1,28 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=77.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "textual-widgets"
-version = "0.32.0"
-description = "Wiederverwendbare Textual-Widgets: DatePicker, SearchHistoryDropdown, ContextMenu, Splitter, HamburgerMenu und mehr"
+version = "0.32.1"
+description = "Reusable Textual widgets: DatePicker, SearchHistoryDropdown, ContextMenu, Splitter, HamburgerMenu and more"
+readme = "README.md"
+license = "Apache-2.0"
 requires-python = ">=3.12"
+authors = [
+    { name = "Michael Blaess" },
+]
+keywords = ["textual", "tui", "widgets", "terminal"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Terminals",
+]
 dependencies = [
     "textual>=0.40",
     "rich>=13.0",
@@ -28,6 +44,11 @@ dev = [
 
 [project.scripts]
 textual-widgets-storybook = "textual_widgets.storybook.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/michaelblaess/textual-widgets"
+Repository = "https://github.com/michaelblaess/textual-widgets"
+Issues = "https://github.com/michaelblaess/textual-widgets/issues"
 
 [tool.poe.tasks]
 storybook = { cmd = "python -m textual_widgets.storybook", help = "Startet die Storybook-Demo" }

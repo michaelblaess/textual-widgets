@@ -528,20 +528,20 @@ To update the title at runtime (e.g. per track), call `set_terminal_title()` fro
 ## Installation
 
 ```bash
-pip install "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git"
+pip install textual-widgets
 ```
 
-With storybook and retro themes:
+The storybook (`textual-widgets-storybook`) picks up the retro themes when they are installed:
 
 ```bash
-pip install "textual-widgets[storybook] @ git+https://github.com/michaelblaess/textual-widgets.git"
+pip install textual-widgets "textual-themes[textual]"
 ```
 
 Or in `pyproject.toml`:
 
 ```toml
 dependencies = [
-    "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git@v0.26.0",
+    "textual-widgets>=0.32.1",
 ]
 ```
 

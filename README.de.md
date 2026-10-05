@@ -528,20 +528,20 @@ Für Laufzeit-Updates (z.B. pro Track) `set_terminal_title()` aus einem `watch_`
 ## Installation
 
 ```bash
-pip install "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git"
+pip install textual-widgets
 ```
 
-Mit Storybook und Retro-Themes:
+Das Storybook (`textual-widgets-storybook`) bindet die Retro-Themes ein, wenn sie installiert sind:
 
 ```bash
-pip install "textual-widgets[storybook] @ git+https://github.com/michaelblaess/textual-widgets.git"
+pip install textual-widgets "textual-themes[textual]"
 ```
 
 Oder in `pyproject.toml`:
 
 ```toml
 dependencies = [
-    "textual-widgets @ git+https://github.com/michaelblaess/textual-widgets.git@v0.26.0",
+    "textual-widgets>=0.32.1",
 ]
 ```
 

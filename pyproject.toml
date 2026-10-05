@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "textual-widgets"
-version = "0.32.1"
+version = "0.32.2"
 description = "Reusable Textual widgets: DatePicker, SearchHistoryDropdown, ContextMenu, Splitter, HamburgerMenu and more"
 readme = "README.md"
 license = "Apache-2.0"

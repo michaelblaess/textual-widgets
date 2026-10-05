@@ -633,7 +633,7 @@ textual = [
 
 [[package]]
 name = "textual-widgets"
-version = "0.32.1"
+version = "0.32.2"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },
